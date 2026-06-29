@@ -2,11 +2,11 @@
 
 namespace App\Models;
 
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -22,7 +22,7 @@ class Usuario extends Authenticatable implements MustVerifyEmail
         'name',
         'email',
         'email_verified_at',
-        'password',
+        'contrasena',
         'direccion',
         'telefono',
         'remember_token',
@@ -30,18 +30,31 @@ class Usuario extends Authenticatable implements MustVerifyEmail
 
     protected $appends = [
         'name',
+        'actor',
     ];
 
     protected $hidden = [
-        'password',
+        'contrasena',
     ];
+
+    protected $authPasswordName = 'contrasena';
 
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'contrasena' => 'hashed',
         ];
+    }
+
+    public function getAuthPasswordName(): string
+    {
+        return 'contrasena';
+    }
+
+    public function getAuthPassword(): string
+    {
+        return $this->contrasena;
     }
 
     public function getNameAttribute(): string
@@ -52,6 +65,33 @@ class Usuario extends Authenticatable implements MustVerifyEmail
     public function setNameAttribute(string $value): void
     {
         $this->attributes['nombre'] = $value;
+    }
+
+    public function getActorAttribute(): ?string
+    {
+        if ($this->relationLoaded('propietario') ? $this->propietario : $this->propietario()->exists()) {
+            return 'propietario';
+        }
+
+        if ($this->relationLoaded('proveedor') ? $this->proveedor : $this->proveedor()->exists()) {
+            return 'proveedor';
+        }
+
+        if ($this->relationLoaded('cliente') ? $this->cliente : $this->cliente()->exists()) {
+            return 'cliente';
+        }
+
+        return null;
+    }
+
+    public function dashboardRouteName(): string
+    {
+        return match ($this->actor) {
+            'propietario' => 'dashboard.propietario',
+            'proveedor' => 'dashboard.proveedor',
+            'cliente' => 'dashboard.cliente',
+            default => 'dashboard.default',
+        };
     }
 
     public function cliente(): HasOne

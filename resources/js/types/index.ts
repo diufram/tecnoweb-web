@@ -37,6 +37,7 @@ export interface User {
     email: string;
     direccion: string;
     telefono: string;
+    actor: 'propietario' | 'proveedor' | 'cliente' | null;
     avatar?: string;
     email_verified_at: string | null;
     created_at: string;
