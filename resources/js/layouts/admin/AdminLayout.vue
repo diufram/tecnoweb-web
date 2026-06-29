@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/sidebar';
 import type { BreadcrumbItemType } from '@/types';
 import { Link, usePage } from '@inertiajs/vue3';
-import { BarChart3, Boxes, FileText, Handshake, LayoutGrid, Package, ShoppingCart, Truck, Users } from 'lucide-vue-next';
+import { BarChart3, Boxes, FileText, Handshake, KeyRound, LayoutGrid, Palette, Package, ShoppingCart, Truck, UserRound, Users } from 'lucide-vue-next';
 import { computed, type Component } from 'vue';
 
 type Actor = 'propietario' | 'proveedor';
@@ -48,6 +48,9 @@ const navItems = computed<AdminNavItem[]>(() => {
             { title: 'Clientes', href: '#clientes', icon: Users },
             { title: 'Proveedores', href: '#proveedores', icon: Truck },
             { title: 'Reportes', href: '#reportes', icon: BarChart3 },
+            { title: 'Perfil', href: '/settings/profile', icon: UserRound },
+            { title: 'Contraseña', href: '/settings/password', icon: KeyRound },
+            { title: 'Apariencia', href: '/settings/appearance', icon: Palette },
         ];
     }
 
@@ -57,6 +60,9 @@ const navItems = computed<AdminNavItem[]>(() => {
         { title: 'Contraofertas', href: '#contraofertas', icon: Handshake },
         { title: 'Compras', href: '#compras', icon: ShoppingCart },
         { title: 'Historial', href: '#historial', icon: BarChart3 },
+        { title: 'Perfil', href: '/settings/profile', icon: UserRound },
+        { title: 'Contraseña', href: '/settings/password', icon: KeyRound },
+        { title: 'Apariencia', href: '/settings/appearance', icon: Palette },
     ];
 });
 </script>

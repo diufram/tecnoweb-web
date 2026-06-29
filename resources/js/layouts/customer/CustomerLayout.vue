@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import type { SharedData, User } from '@/types';
 import { Link, usePage } from '@inertiajs/vue3';
-import { CreditCard, Home, PackageSearch, ReceiptText } from 'lucide-vue-next';
+import { CreditCard, Home, KeyRound, PackageSearch, Palette, ReceiptText, UserRound } from 'lucide-vue-next';
 
 const page = usePage<SharedData>();
 const user = page.props.auth.user as User;
@@ -16,6 +16,9 @@ const navItems = [
     { title: 'Catálogo', href: '#catalogo', icon: PackageSearch },
     { title: 'Mis compras', href: '#compras', icon: ReceiptText },
     { title: 'Pagos', href: '#pagos', icon: CreditCard },
+    { title: 'Perfil', href: '/settings/profile', icon: UserRound },
+    { title: 'Contraseña', href: '/settings/password', icon: KeyRound },
+    { title: 'Apariencia', href: '/settings/appearance', icon: Palette },
 ];
 </script>
 

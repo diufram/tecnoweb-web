@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import InputError from '@/components/InputError.vue';
-import AppLayout from '@/layouts/AppLayout.vue';
+import AccountLayout from '@/layouts/account/AccountLayout.vue';
 import SettingsLayout from '@/layouts/settings/Layout.vue';
 import { TransitionRoot } from '@headlessui/vue';
 import { Head, useForm } from '@inertiajs/vue3';
@@ -58,7 +58,7 @@ const updatePassword = () => {
 </script>
 
 <template>
-    <AppLayout :breadcrumbs="breadcrumbItems">
+    <AccountLayout :breadcrumbs="breadcrumbItems">
         <Head title="Profile settings" />
 
         <SettingsLayout>
@@ -123,5 +123,5 @@ const updatePassword = () => {
                 </form>
             </div>
         </SettingsLayout>
-    </AppLayout>
+    </AccountLayout>
 </template>

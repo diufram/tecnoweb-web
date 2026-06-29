@@ -8,7 +8,7 @@ import InputError from '@/components/InputError.vue';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import AppLayout from '@/layouts/AppLayout.vue';
+import AccountLayout from '@/layouts/account/AccountLayout.vue';
 import SettingsLayout from '@/layouts/settings/Layout.vue';
 import { type BreadcrumbItem, type SharedData, type User } from '@/types';
 
@@ -43,7 +43,7 @@ const submit = () => {
 </script>
 
 <template>
-    <AppLayout :breadcrumbs="breadcrumbs">
+    <AccountLayout :breadcrumbs="breadcrumbs">
         <Head title="Profile settings" />
 
         <SettingsLayout>
@@ -107,5 +107,5 @@ const submit = () => {
 
             <DeleteUser />
         </SettingsLayout>
-    </AppLayout>
+    </AccountLayout>
 </template>
