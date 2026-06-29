@@ -92,31 +92,31 @@ html {
 
 @layer base {
     .theme-kids {
-        --background: 210 100% 98%;
-        --foreground: 224 71% 18%;
+        --background: 48 100% 96%;
+        --foreground: 222 84% 17%;
         --card: 0 0% 100%;
-        --card-foreground: 224 71% 18%;
+        --card-foreground: 222 84% 17%;
         --popover: 0 0% 100%;
-        --popover-foreground: 224 71% 18%;
-        --primary: 199 89% 48%;
+        --popover-foreground: 222 84% 17%;
+        --primary: 199 95% 45%;
         --primary-foreground: 0 0% 100%;
-        --secondary: 48 96% 89%;
-        --secondary-foreground: 224 71% 18%;
-        --muted: 210 80% 94%;
-        --muted-foreground: 216 30% 36%;
-        --accent: 142 76% 90%;
-        --accent-foreground: 224 71% 18%;
-        --border: 199 70% 85%;
-        --input: 199 70% 85%;
-        --ring: 199 89% 48%;
+        --secondary: 52 98% 78%;
+        --secondary-foreground: 222 84% 17%;
+        --muted: 185 84% 90%;
+        --muted-foreground: 222 45% 32%;
+        --accent: 329 86% 88%;
+        --accent-foreground: 222 84% 17%;
+        --border: 199 85% 76%;
+        --input: 199 85% 76%;
+        --ring: 199 95% 45%;
         --radius: 1rem;
-        --sidebar-background: 210 100% 97%;
-        --sidebar-foreground: 224 71% 18%;
-        --sidebar-primary: 199 89% 48%;
+        --sidebar-background: 48 100% 93%;
+        --sidebar-foreground: 222 84% 17%;
+        --sidebar-primary: 199 95% 45%;
         --sidebar-primary-foreground: 0 0% 100%;
-        --sidebar-accent: 199 90% 92%;
-        --sidebar-accent-foreground: 224 71% 18%;
-        --sidebar-border: 199 70% 85%;
+        --sidebar-accent: 329 86% 88%;
+        --sidebar-accent-foreground: 222 84% 17%;
+        --sidebar-border: 199 85% 76%;
     }
 
     .dark.theme-kids {
@@ -147,31 +147,31 @@ html {
     }
 
     .theme-youth {
-        --background: 260 40% 98%;
-        --foreground: 240 35% 12%;
+        --background: 270 100% 98%;
+        --foreground: 246 47% 15%;
         --card: 0 0% 100%;
         --card-foreground: 240 35% 12%;
         --popover: 0 0% 100%;
         --popover-foreground: 240 35% 12%;
-        --primary: 262 83% 58%;
+        --primary: 266 85% 55%;
         --primary-foreground: 0 0% 100%;
-        --secondary: 262 55% 92%;
-        --secondary-foreground: 240 35% 12%;
-        --muted: 260 28% 94%;
-        --muted-foreground: 240 18% 38%;
-        --accent: 330 81% 92%;
-        --accent-foreground: 240 35% 12%;
-        --border: 260 35% 86%;
-        --input: 260 35% 86%;
-        --ring: 262 83% 58%;
+        --secondary: 190 95% 84%;
+        --secondary-foreground: 246 47% 15%;
+        --muted: 266 72% 93%;
+        --muted-foreground: 246 27% 35%;
+        --accent: 330 90% 86%;
+        --accent-foreground: 246 47% 15%;
+        --border: 266 60% 80%;
+        --input: 266 60% 80%;
+        --ring: 266 85% 55%;
         --radius: 0.75rem;
-        --sidebar-background: 260 40% 97%;
-        --sidebar-foreground: 240 35% 12%;
-        --sidebar-primary: 262 83% 58%;
+        --sidebar-background: 266 85% 96%;
+        --sidebar-foreground: 246 47% 15%;
+        --sidebar-primary: 266 85% 55%;
         --sidebar-primary-foreground: 0 0% 100%;
-        --sidebar-accent: 262 55% 92%;
-        --sidebar-accent-foreground: 240 35% 12%;
-        --sidebar-border: 260 35% 86%;
+        --sidebar-accent: 190 95% 84%;
+        --sidebar-accent-foreground: 246 47% 15%;
+        --sidebar-border: 266 60% 80%;
     }
 
     .dark.theme-youth {
@@ -202,19 +202,104 @@ html {
     }
 
     .theme-adults {
+        --background: 150 25% 98%;
+        --foreground: 160 24% 12%;
+        --card: 0 0% 100%;
+        --card-foreground: 160 24% 12%;
+        --popover: 0 0% 100%;
+        --popover-foreground: 160 24% 12%;
+        --primary: 162 47% 30%;
+        --primary-foreground: 0 0% 100%;
+        --secondary: 150 18% 90%;
+        --secondary-foreground: 160 24% 12%;
+        --muted: 150 18% 94%;
+        --muted-foreground: 160 12% 34%;
+        --accent: 38 45% 87%;
+        --accent-foreground: 160 24% 12%;
+        --border: 150 16% 82%;
+        --input: 150 16% 82%;
+        --ring: 162 47% 30%;
         --radius: 0.5rem;
+        --sidebar-background: 150 25% 96%;
+        --sidebar-foreground: 160 24% 12%;
+        --sidebar-primary: 162 47% 30%;
+        --sidebar-primary-foreground: 0 0% 100%;
+        --sidebar-accent: 150 18% 90%;
+        --sidebar-accent-foreground: 160 24% 12%;
+        --sidebar-border: 150 16% 82%;
     }
 
-    .text-scale-normal {
+    .dark.theme-adults {
+        --background: 160 24% 7%;
+        --foreground: 150 25% 96%;
+        --card: 160 20% 10%;
+        --card-foreground: 150 25% 96%;
+        --popover: 160 20% 10%;
+        --popover-foreground: 150 25% 96%;
+        --primary: 160 45% 58%;
+        --primary-foreground: 160 24% 7%;
+        --secondary: 160 14% 18%;
+        --secondary-foreground: 150 25% 96%;
+        --muted: 160 14% 14%;
+        --muted-foreground: 150 14% 76%;
+        --accent: 38 35% 22%;
+        --accent-foreground: 150 25% 96%;
+        --border: 160 12% 24%;
+        --input: 160 12% 24%;
+        --ring: 160 45% 58%;
+        --sidebar-background: 160 24% 8%;
+        --sidebar-foreground: 150 25% 96%;
+        --sidebar-primary: 160 45% 58%;
+        --sidebar-primary-foreground: 160 24% 7%;
+        --sidebar-accent: 160 14% 18%;
+        --sidebar-accent-foreground: 150 25% 96%;
+        --sidebar-border: 160 12% 24%;
+    }
+
+    html.text-scale-normal {
         font-size: 16px;
     }
 
-    .text-scale-large {
+    html.text-scale-large {
         font-size: 18px;
     }
 
-    .text-scale-extra-large {
+    html.text-scale-extra-large {
         font-size: 20px;
+    }
+
+    html.text-scale-large body,
+    html.text-scale-large button,
+    html.text-scale-large input,
+    html.text-scale-large textarea,
+    html.text-scale-large select {
+        font-size: 1.0625rem;
+        line-height: 1.65;
+    }
+
+    html.text-scale-extra-large body,
+    html.text-scale-extra-large button,
+    html.text-scale-extra-large input,
+    html.text-scale-extra-large textarea,
+    html.text-scale-extra-large select {
+        font-size: 1.1875rem;
+        line-height: 1.75;
+    }
+
+    html.text-scale-large .text-xs {
+        font-size: 0.85rem;
+    }
+
+    html.text-scale-large .text-sm {
+        font-size: 1rem;
+    }
+
+    html.text-scale-extra-large .text-xs {
+        font-size: 0.95rem;
+    }
+
+    html.text-scale-extra-large .text-sm {
+        font-size: 1.1rem;
     }
 
     .contrast-high {
