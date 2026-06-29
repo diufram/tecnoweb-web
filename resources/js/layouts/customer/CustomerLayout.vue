@@ -22,7 +22,7 @@ const navItems = [
 </script>
 
 <template>
-    <div class="min-h-svh bg-gradient-to-b from-background via-background to-muted/40">
+    <div class="min-h-svh bg-background">
         <header class="sticky top-0 z-30 border-b bg-background/85 backdrop-blur">
             <div class="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
                 <Link href="/dashboard/cliente" class="flex items-center gap-3 font-semibold">

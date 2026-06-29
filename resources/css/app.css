@@ -33,8 +33,8 @@ html {
         --chart-3: 197 37% 24%;
         --chart-4: 43 74% 66%;
         --chart-5: 27 87% 67%;
-        --radius: 0.5rem;
-        --sidebar-background: 0 0% 98%;
+            --radius: 0.4rem;
+            --sidebar-background: 0 0% 98%;
         --sidebar-foreground: 240 5.3% 26.1%;
         --sidebar-primary: 0 0% 10%;
         --sidebar-primary-foreground: 0 0% 98%;
@@ -64,6 +64,7 @@ html {
         --border: 0 0% 14.9%;
         --input: 0 0% 14.9%;
         --ring: 0 0% 83.1%;
+        --radius: 0.4rem;
         --chart-1: 220 70% 50%;
         --chart-2: 160 60% 45%;
         --chart-3: 30 80% 55%;
@@ -91,171 +92,217 @@ html {
 }
 
 @layer base {
-    .theme-kids {
-        --background: 48 100% 96%;
-        --foreground: 222 84% 17%;
-        --card: 0 0% 100%;
-        --card-foreground: 222 84% 17%;
+    /* ===================== NIÑO - DÍA ===================== */
+    .theme-kids:not(.dark) {
+        --background: 215 100% 98%;           /* #F3F8FF */
+        --foreground: 217 33% 17%;            /* #1E293B */
+        --card: 0 0% 100%;                    /* #FFFFFF */
+        --card-foreground: 217 33% 17%;
         --popover: 0 0% 100%;
-        --popover-foreground: 222 84% 17%;
-        --primary: 199 95% 45%;
-        --primary-foreground: 0 0% 100%;
-        --secondary: 52 98% 78%;
-        --secondary-foreground: 222 84% 17%;
-        --muted: 185 84% 90%;
-        --muted-foreground: 222 45% 32%;
-        --accent: 329 86% 88%;
-        --accent-foreground: 222 84% 17%;
-        --border: 199 85% 76%;
-        --input: 199 85% 76%;
-        --ring: 199 95% 45%;
-        --radius: 1rem;
-        --sidebar-background: 48 100% 93%;
-        --sidebar-foreground: 222 84% 17%;
-        --sidebar-primary: 199 95% 45%;
-        --sidebar-primary-foreground: 0 0% 100%;
-        --sidebar-accent: 329 86% 88%;
-        --sidebar-accent-foreground: 222 84% 17%;
-        --sidebar-border: 199 85% 76%;
+        --popover-foreground: 217 33% 17%;
+        --primary: 212 100% 68%;              /* #5BA8FF */
+        --primary-hover: 212 85% 58%;         /* #3B8FEF */
+        --primary-foreground: 217 33% 17%;
+        --secondary: 172 58% 68%;             /* #7DDCCF */
+        --secondary-foreground: 217 33% 17%;
+        --muted: 211 100% 96%;                /* #EAF4FF */
+        --muted-foreground: 215 16% 47%;      /* #64748B */
+        --accent: 14 100% 82%;                /* #FFB7A1 */
+        --accent-foreground: 217 33% 17%;
+        --destructive: 350 80% 75%;           /* #F28B9C */
+        --destructive-foreground: 217 33% 17%;
+        --success: 152 56% 64%;               /* #6ED6A5 */
+        --success-foreground: 217 33% 17%;
+        --border: 212 95% 92%;                /* #D8EAFE */
+        --input: 212 95% 92%;
+        --ring: 212 100% 68%;
+        --radius: 0.4rem;
+        --sidebar-background: 215 100% 98%;
+        --sidebar-foreground: 217 33% 17%;
+        --sidebar-primary: 212 100% 68%;
+        --sidebar-primary-foreground: 217 33% 17%;
+        --sidebar-accent: 211 100% 96%;
+        --sidebar-accent-foreground: 215 16% 47%;
+        --sidebar-border: 212 95% 92%;
+        --sidebar-ring: 212 100% 68%;
     }
 
-    .dark.theme-kids {
-        --background: 224 71% 8%;
-        --foreground: 210 100% 96%;
-        --card: 224 55% 12%;
-        --card-foreground: 210 100% 96%;
-        --popover: 224 55% 12%;
-        --popover-foreground: 210 100% 96%;
-        --primary: 190 95% 62%;
-        --primary-foreground: 224 71% 8%;
-        --secondary: 260 60% 24%;
-        --secondary-foreground: 210 100% 96%;
-        --muted: 224 40% 18%;
-        --muted-foreground: 210 35% 76%;
-        --accent: 142 55% 28%;
-        --accent-foreground: 210 100% 96%;
-        --border: 224 30% 26%;
-        --input: 224 30% 26%;
-        --ring: 190 95% 62%;
-        --sidebar-background: 224 71% 9%;
-        --sidebar-foreground: 210 100% 96%;
-        --sidebar-primary: 190 95% 62%;
-        --sidebar-primary-foreground: 224 71% 8%;
-        --sidebar-accent: 224 40% 18%;
-        --sidebar-accent-foreground: 210 100% 96%;
-        --sidebar-border: 224 30% 26%;
+    /* ===================== NIÑO - NOCHE ===================== */
+    .theme-kids.dark {
+        --background: 221 52% 13%;            /* #101B33 */
+        --foreground: 210 40% 98%;            /* #F8FAFC */
+        --card: 221 49% 18%;                  /* #172544 */
+        --card-foreground: 210 40% 98%;
+        --popover: 221 49% 18%;
+        --popover-foreground: 210 40% 98%;
+        --primary: 213 100% 75%;              /* #7DB7FF */
+        --primary-hover: 213 91% 67%;         /* #5DA2F7 */
+        --primary-foreground: 221 52% 13%;
+        --secondary: 172 66% 73%;             /* #8BE7DA */
+        --secondary-foreground: 221 52% 13%;
+        --muted: 220 48% 24%;                 /* #20345C */
+        --muted-foreground: 216 100% 86%;     /* #B9D5FF */
+        --accent: 14 100% 83%;                /* #FFBCA8 */
+        --accent-foreground: 221 52% 13%;
+        --destructive: 349 100% 80%;          /* #FF9AAD */
+        --destructive-foreground: 221 52% 13%;
+        --success: 151 63% 70%;               /* #82E3B4 */
+        --success-foreground: 221 52% 13%;
+        --border: 219 45% 30%;                /* #2A4370 */
+        --input: 219 45% 30%;
+        --ring: 213 100% 75%;
+        --radius: 0.4rem;
+        --sidebar-background: 221 52% 13%;
+        --sidebar-foreground: 210 40% 98%;
+        --sidebar-primary: 213 100% 75%;
+        --sidebar-primary-foreground: 221 52% 13%;
+        --sidebar-accent: 220 48% 24%;
+        --sidebar-accent-foreground: 216 100% 86%;
+        --sidebar-border: 219 45% 30%;
+        --sidebar-ring: 213 100% 75%;
     }
 
-    .theme-youth {
-        --background: 270 100% 98%;
-        --foreground: 246 47% 15%;
-        --card: 0 0% 100%;
-        --card-foreground: 240 35% 12%;
+    /* ===================== JOVEN - DÍA ===================== */
+    .theme-youth:not(.dark) {
+        --background: 240 33% 98%;             /* #F7F7FB */
+        --foreground: 230 21% 11%;            /* #171923 */
+        --card: 0 0% 100%;                    /* #FFFFFF */
+        --card-foreground: 230 21% 11%;
         --popover: 0 0% 100%;
-        --popover-foreground: 240 35% 12%;
-        --primary: 266 85% 55%;
-        --primary-foreground: 0 0% 100%;
-        --secondary: 190 95% 84%;
-        --secondary-foreground: 246 47% 15%;
-        --muted: 266 72% 93%;
-        --muted-foreground: 246 27% 35%;
-        --accent: 330 90% 86%;
-        --accent-foreground: 246 47% 15%;
-        --border: 266 60% 80%;
-        --input: 266 60% 80%;
-        --ring: 266 85% 55%;
-        --radius: 0.75rem;
-        --sidebar-background: 266 85% 96%;
-        --sidebar-foreground: 246 47% 15%;
-        --sidebar-primary: 266 85% 55%;
-        --sidebar-primary-foreground: 0 0% 100%;
-        --sidebar-accent: 190 95% 84%;
-        --sidebar-accent-foreground: 246 47% 15%;
-        --sidebar-border: 266 60% 80%;
+        --popover-foreground: 230 21% 11%;
+        --primary: 252 100% 68%;              /* #7C5CFF */
+        --primary-hover: 252 78% 60%;         /* #6848E8 */
+        --primary-foreground: 230 21% 11%;
+        --secondary: 187 68% 54%;             /* #38C6D9 */
+        --secondary-foreground: 230 21% 11%;
+        --muted: 230 55% 96%;                 /* #EEF0FA */
+        --muted-foreground: 220 9% 46%;       /* #6B7280 */
+        --accent: 332 75% 64%;                /* #E85D9E */
+        --accent-foreground: 230 21% 11%;
+        --destructive: 350 83% 66%;           /* #F0617A */
+        --destructive-foreground: 230 21% 11%;
+        --success: 154 58% 52%;               /* #3CCB8E */
+        --success-foreground: 230 21% 11%;
+        --border: 231 32% 91%;                /* #E2E4F0 */
+        --input: 231 32% 91%;
+        --ring: 252 100% 68%;
+        --radius: 0.4rem;
+        --sidebar-background: 240 33% 98%;
+        --sidebar-foreground: 230 21% 11%;
+        --sidebar-primary: 252 100% 68%;
+        --sidebar-primary-foreground: 230 21% 11%;
+        --sidebar-accent: 230 55% 96%;
+        --sidebar-accent-foreground: 220 9% 46%;
+        --sidebar-border: 231 32% 91%;
+        --sidebar-ring: 252 100% 68%;
     }
 
-    .dark.theme-youth {
-        --background: 240 35% 7%;
-        --foreground: 260 40% 96%;
-        --card: 240 28% 11%;
-        --card-foreground: 260 40% 96%;
-        --popover: 240 28% 11%;
-        --popover-foreground: 260 40% 96%;
-        --primary: 262 90% 72%;
-        --primary-foreground: 240 35% 7%;
-        --secondary: 262 35% 22%;
-        --secondary-foreground: 260 40% 96%;
-        --muted: 240 24% 16%;
-        --muted-foreground: 260 22% 74%;
-        --accent: 330 55% 25%;
-        --accent-foreground: 260 40% 96%;
-        --border: 240 20% 24%;
-        --input: 240 20% 24%;
-        --ring: 262 90% 72%;
-        --sidebar-background: 240 35% 8%;
-        --sidebar-foreground: 260 40% 96%;
-        --sidebar-primary: 262 90% 72%;
-        --sidebar-primary-foreground: 240 35% 7%;
-        --sidebar-accent: 240 24% 16%;
-        --sidebar-accent-foreground: 260 40% 96%;
-        --sidebar-border: 240 20% 24%;
+    /* ===================== JOVEN - NOCHE ===================== */
+    .theme-youth.dark {
+        --background: 235 30% 8%;             /* #0E0F1A */
+        --foreground: 210 40% 98%;            /* #F8FAFC */
+        --card: 236 26% 12%;                  /* #171827 */
+        --card-foreground: 210 40% 98%;
+        --popover: 236 26% 12%;
+        --popover-foreground: 210 40% 98%;
+        --primary: 254 100% 74%;              /* #9B7CFF */
+        --primary-hover: 254 84% 67%;         /* #8665F2 */
+        --primary-foreground: 235 30% 8%;
+        --secondary: 187 78% 59%;             /* #46D5E8 */
+        --secondary-foreground: 235 30% 8%;
+        --muted: 235 26% 18%;                 /* #22243A */
+        --muted-foreground: 234 52% 81%;      /* #B7BCE8 */
+        --accent: 330 82% 68%;                /* #F06AAE */
+        --accent-foreground: 235 30% 8%;
+        --destructive: 350 100% 74%;          /* #FF7B91 */
+        --destructive-foreground: 235 30% 8%;
+        --success: 156 69% 58%;               /* #4ADEA3 */
+        --success-foreground: 235 30% 8%;
+        --border: 236 23% 25%;                /* #30324D */
+        --input: 236 23% 25%;
+        --ring: 254 100% 74%;
+        --radius: 0.4rem;
+        --sidebar-background: 235 30% 8%;
+        --sidebar-foreground: 210 40% 98%;
+        --sidebar-primary: 254 100% 74%;
+        --sidebar-primary-foreground: 235 30% 8%;
+        --sidebar-accent: 235 26% 18%;
+        --sidebar-accent-foreground: 234 52% 81%;
+        --sidebar-border: 236 23% 25%;
+        --sidebar-ring: 254 100% 74%;
     }
 
-    .theme-adults {
-        --background: 150 25% 98%;
-        --foreground: 160 24% 12%;
-        --card: 0 0% 100%;
-        --card-foreground: 160 24% 12%;
+    /* ===================== ADULTO - DÍA ===================== */
+    .theme-adults:not(.dark) {
+        --background: 36 38% 95%;             /* #F7F3ED */
+        --foreground: 215 19% 17%;            /* #242B35 */
+        --card: 0 0% 100%;                    /* #FFFFFF */
+        --card-foreground: 215 19% 17%;
         --popover: 0 0% 100%;
-        --popover-foreground: 160 24% 12%;
-        --primary: 162 47% 30%;
+        --popover-foreground: 215 19% 17%;
+        --primary: 150 15% 36%;               /* #4E6A5C */
+        --primary-hover: 150 16% 29%;         /* #3F574B */
         --primary-foreground: 0 0% 100%;
-        --secondary: 150 18% 90%;
-        --secondary-foreground: 160 24% 12%;
-        --muted: 150 18% 94%;
-        --muted-foreground: 160 12% 34%;
-        --accent: 38 45% 87%;
-        --accent-foreground: 160 24% 12%;
-        --border: 150 16% 82%;
-        --input: 150 16% 82%;
-        --ring: 162 47% 30%;
-        --radius: 0.5rem;
-        --sidebar-background: 150 25% 96%;
-        --sidebar-foreground: 160 24% 12%;
-        --sidebar-primary: 162 47% 30%;
+        --secondary: 216 15% 52%;             /* #718096 */
+        --secondary-foreground: 0 0% 100%;
+        --muted: 35 32% 90%;                  /* #EDE6DC */
+        --muted-foreground: 221 13% 46%;      /* #667085 */
+        --accent: 33 43% 52%;                 /* #B8894F */
+        --accent-foreground: 0 0% 100%;
+        --destructive: 0 39% 54%;             /* #B85C5C */
+        --destructive-foreground: 0 0% 100%;
+        --success: 146 32% 44%;               /* #4C956C */
+        --success-foreground: 0 0% 100%;
+        --border: 34 25% 82%;                 /* #DDD3C6 */
+        --input: 34 25% 82%;
+        --ring: 150 15% 36%;
+        --radius: 0.4rem;
+        --sidebar-background: 36 38% 95%;
+        --sidebar-foreground: 215 19% 17%;
+        --sidebar-primary: 150 15% 36%;
         --sidebar-primary-foreground: 0 0% 100%;
-        --sidebar-accent: 150 18% 90%;
-        --sidebar-accent-foreground: 160 24% 12%;
-        --sidebar-border: 150 16% 82%;
+        --sidebar-accent: 35 32% 90%;
+        --sidebar-accent-foreground: 221 13% 46%;
+        --sidebar-border: 34 25% 82%;
+        --sidebar-ring: 150 15% 36%;
     }
 
-    .dark.theme-adults {
-        --background: 160 24% 7%;
-        --foreground: 150 25% 96%;
-        --card: 160 20% 10%;
-        --card-foreground: 150 25% 96%;
-        --popover: 160 20% 10%;
-        --popover-foreground: 150 25% 96%;
-        --primary: 160 45% 58%;
-        --primary-foreground: 160 24% 7%;
-        --secondary: 160 14% 18%;
-        --secondary-foreground: 150 25% 96%;
-        --muted: 160 14% 14%;
-        --muted-foreground: 150 14% 76%;
-        --accent: 38 35% 22%;
-        --accent-foreground: 150 25% 96%;
-        --border: 160 12% 24%;
-        --input: 160 12% 24%;
-        --ring: 160 45% 58%;
-        --sidebar-background: 160 24% 8%;
-        --sidebar-foreground: 150 25% 96%;
-        --sidebar-primary: 160 45% 58%;
-        --sidebar-primary-foreground: 160 24% 7%;
-        --sidebar-accent: 160 14% 18%;
-        --sidebar-accent-foreground: 150 25% 96%;
-        --sidebar-border: 160 12% 24%;
+    /* ===================== ADULTO - NOCHE ===================== */
+    .theme-adults.dark {
+        --background: 218 23% 9%;             /* #12161D */
+        --foreground: 216 33% 97%;            /* #F5F7FA */
+        --card: 216 21% 14%;                  /* #1D232C */
+        --card-foreground: 216 33% 97%;
+        --popover: 216 21% 14%;
+        --popover-foreground: 216 33% 97%;
+        --primary: 35 43% 57%;                /* #C19A62 */
+        --primary-hover: 36 37% 49%;          /* #AA854F */
+        --primary-foreground: 218 23% 9%;
+        --secondary: 213 14% 60%;             /* #8B98A8 */
+        --secondary-foreground: 218 23% 9%;
+        --muted: 216 20% 20%;                 /* #29313D */
+        --muted-foreground: 216 18% 78%;      /* #BCC4D0 */
+        --accent: 37 49% 65%;                 /* #D2B07A */
+        --accent-foreground: 218 23% 9%;
+        --destructive: 0 49% 64%;             /* #D07575 */
+        --destructive-foreground: 218 23% 9%;
+        --success: 146 35% 58%;               /* #6EB98F */
+        --success-foreground: 218 23% 9%;
+        --border: 215 16% 27%;                /* #3A4350 */
+        --input: 215 16% 27%;
+        --ring: 35 43% 57%;
+        --radius: 0.4rem;
+        --sidebar-background: 218 23% 9%;
+        --sidebar-foreground: 216 33% 97%;
+        --sidebar-primary: 35 43% 57%;
+        --sidebar-primary-foreground: 218 23% 9%;
+        --sidebar-accent: 216 20% 20%;
+        --sidebar-accent-foreground: 216 18% 78%;
+        --sidebar-border: 215 16% 27%;
+        --sidebar-ring: 35 43% 57%;
     }
 
+    /* --------- Tamaño de texto --------- */
     html.text-scale-normal {
         font-size: 16px;
     }
@@ -302,7 +349,35 @@ html {
         font-size: 1.1rem;
     }
 
-    .contrast-high {
+    /* --------- Tipografías por tema --------- */
+    html.theme-kids body,
+    html.theme-kids button,
+    html.theme-kids input,
+    html.theme-kids textarea,
+    html.theme-kids select {
+        font-family: 'Nunito', 'Comic Sans MS', 'Comic Sans', 'Trebuchet MS', system-ui, sans-serif;
+        letter-spacing: 0.01em;
+    }
+
+    html.theme-youth body,
+    html.theme-youth button,
+    html.theme-youth input,
+    html.theme-youth textarea,
+    html.theme-youth select {
+        font-family: 'Poppins', 'Inter', system-ui, sans-serif;
+    }
+
+    html.theme-adults body,
+    html.theme-adults button,
+    html.theme-adults input,
+    html.theme-adults textarea,
+    html.theme-adults select {
+        font-family: 'Inter', system-ui, sans-serif;
+        letter-spacing: -0.005em;
+    }
+
+    /* --------- Alto contraste --------- */
+    .contrast-high:not(.dark) {
         --background: 0 0% 100%;
         --foreground: 0 0% 0%;
         --card: 0 0% 100%;
@@ -317,6 +392,8 @@ html {
         --muted-foreground: 0 0% 15%;
         --accent: 55 100% 50%;
         --accent-foreground: 0 0% 0%;
+        --destructive: 0 100% 32%;
+        --destructive-foreground: 0 0% 100%;
         --border: 0 0% 0%;
         --input: 0 0% 0%;
         --ring: 220 100% 30%;
@@ -327,9 +404,10 @@ html {
         --sidebar-accent: 55 100% 50%;
         --sidebar-accent-foreground: 0 0% 0%;
         --sidebar-border: 0 0% 0%;
+        --sidebar-ring: 220 100% 30%;
     }
 
-    .dark.contrast-high {
+    .contrast-high.dark {
         --background: 0 0% 0%;
         --foreground: 0 0% 100%;
         --card: 0 0% 0%;
@@ -344,6 +422,8 @@ html {
         --muted-foreground: 0 0% 90%;
         --accent: 55 100% 55%;
         --accent-foreground: 0 0% 0%;
+        --destructive: 0 95% 60%;
+        --destructive-foreground: 0 0% 100%;
         --border: 0 0% 100%;
         --input: 0 0% 100%;
         --ring: 55 100% 55%;
@@ -354,5 +434,109 @@ html {
         --sidebar-accent: 0 0% 15%;
         --sidebar-accent-foreground: 0 0% 100%;
         --sidebar-border: 0 0% 100%;
+        --sidebar-ring: 55 100% 55%;
+    }
+
+    /* --------- Color de fondo por tema (sin degradados) --------- */
+    html.theme-kids:not(.dark) body {
+        background: hsl(215 100% 98%);
+    }
+
+    html.theme-youth:not(.dark) body {
+        background: hsl(240 33% 98%);
+    }
+
+    html.theme-adults:not(.dark) body {
+        background: hsl(36 38% 95%);
+    }
+
+    html.theme-kids.dark body {
+        background: hsl(221 52% 13%);
+    }
+
+    html.theme-youth.dark body {
+        background: hsl(235 30% 8%);
+    }
+
+    html.theme-adults.dark body {
+        background: hsl(218 23% 9%);
+    }
+
+    html.theme-kids:not(.dark) [data-sidebar='sidebar'] {
+        background: hsl(215 100% 98%);
+    }
+
+    html.theme-youth:not(.dark) [data-sidebar='sidebar'] {
+        background: hsl(240 33% 98%);
+    }
+
+    html.theme-adults:not(.dark) [data-sidebar='sidebar'] {
+        background: hsl(36 38% 95%);
+    }
+
+    html.theme-kids.dark [data-sidebar='sidebar'] {
+        background: hsl(221 52% 13%);
+    }
+
+    html.theme-youth.dark [data-sidebar='sidebar'] {
+        background: hsl(235 30% 8%);
+    }
+
+    html.theme-adults.dark [data-sidebar='sidebar'] {
+        background: hsl(218 23% 9%);
+    }
+
+    html.theme-kids:not(.dark) main.bg-background,
+    html.theme-kids:not(.dark) .bg-background {
+        background: hsl(215 100% 98%);
+    }
+
+    html.theme-youth:not(.dark) main.bg-background,
+    html.theme-youth:not(.dark) .bg-background {
+        background: hsl(240 33% 98%);
+    }
+
+    html.theme-adults:not(.dark) main.bg-background,
+    html.theme-adults:not(.dark) .bg-background {
+        background: hsl(36 38% 95%);
+    }
+
+    html.theme-kids.dark main.bg-background,
+    html.theme-kids.dark .bg-background {
+        background: hsl(221 52% 13%);
+    }
+
+    html.theme-youth.dark main.bg-background,
+    html.theme-youth.dark .bg-background {
+        background: hsl(235 30% 8%);
+    }
+
+    html.theme-adults.dark main.bg-background,
+    html.theme-adults.dark .bg-background {
+        background: hsl(218 23% 9%);
+    }
+
+    html.theme-kids:not(.dark) .bg-card,
+    html.theme-youth:not(.dark) .bg-card,
+    html.theme-adults:not(.dark) .bg-card {
+        background: hsl(0 0% 100%);
+    }
+
+    html.theme-kids.dark .bg-card {
+        background: hsl(221 49% 18%);
+    }
+
+    html.theme-youth.dark .bg-card {
+        background: hsl(236 26% 12%);
+    }
+
+    html.theme-adults.dark .bg-card {
+        background: hsl(216 21% 14%);
+    }
+
+    /* --------- Sin bordes por defecto en botones en modo oscuro --------- */
+    .dark button,
+    .dark [data-sidebar='sidebar'] button {
+        border-color: transparent;
     }
 }
