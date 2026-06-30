@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Propietario\ProductoController;
+use App\Http\Controllers\Propietario\ClienteController;
+use App\Http\Controllers\Propietario\ProveedorController;
 use App\Models\Cliente;
 use App\Models\Compra;
 use App\Models\Producto;
@@ -62,6 +64,11 @@ Route::middleware(['auth', 'verified', 'actor:propietario'])
     ->name('propietario.')
     ->group(function () {
         Route::resource('productos', ProductoController::class)
+            ->only(['index', 'create', 'store', 'edit', 'update']);
+        Route::resource('clientes', ClienteController::class)
+            ->only(['index', 'create', 'store', 'edit', 'update']);
+        Route::resource('proveedores', ProveedorController::class)
+            ->parameters(['proveedores' => 'proveedor'])
             ->only(['index', 'create', 'store', 'edit', 'update']);
     });
 
