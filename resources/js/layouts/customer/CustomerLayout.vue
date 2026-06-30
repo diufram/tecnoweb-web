@@ -25,7 +25,7 @@ const navItems = [
     <div class="min-h-svh bg-background">
         <header class="sticky top-0 z-30 border-b bg-background/85 backdrop-blur">
             <div class="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-                <Link href="/dashboard/cliente" class="flex items-center gap-3 font-semibold">
+                <Link :href="route('dashboard.cliente')" class="flex items-center gap-3 font-semibold">
                     <span class="flex size-10 items-center justify-center rounded-xl bg-primary text-primary-foreground">
                         <AppLogoIcon class="size-6 fill-current" />
                     </span>
