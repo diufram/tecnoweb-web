@@ -114,13 +114,12 @@ const submit = veeForm.handleSubmit((values) => {
 
                 <CardContent>
                     <form class="space-y-6" @submit="submit">
-                        <FormField v-slot="{ componentField, errors }" name="nombre_comercial">
+                        <FormField v-slot="{ componentField }" name="nombre_comercial">
                             <FormItem>
                                 <FormLabel>Nombre comercial</FormLabel>
                                 <FormControl>
                                     <Input
                                         v-bind="componentField"
-                                        :class="errors.length ? 'border-destructive' : ''"
                                         autocomplete="off"
                                         maxlength="255"
                                         placeholder="Ej. Paracetamol 500mg"
@@ -130,13 +129,12 @@ const submit = veeForm.handleSubmit((values) => {
                             </FormItem>
                         </FormField>
 
-                        <FormField v-slot="{ componentField, errors }" name="stock_actual">
+                        <FormField v-slot="{ componentField }" name="stock_actual">
                             <FormItem>
                                 <FormLabel>Stock actual</FormLabel>
                                 <FormControl>
                                     <Input
                                         v-bind="componentField"
-                                        :class="errors.length ? 'border-destructive' : ''"
                                         inputmode="numeric"
                                         min="0"
                                         max="1000000"
