@@ -1,4 +1,7 @@
 import '../css/app.css';
+import '../css/themes/kids.css';
+import '../css/themes/youth.css';
+import '../css/themes/adults.css';
 
 import { createInertiaApp } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';

@@ -1,0 +1,95 @@
+/* ===================== NIÑO MINIMALISTA - DÍA ===================== */
+.theme-kids:not(.dark) {
+    --background: 218 100% 98%; /* #F7FAFF */
+    --foreground: 216 28% 21%; /* #263244 */
+
+    --card: 0 0% 100%; /* #FFFFFF */
+    --card-foreground: 216 28% 21%; /* #263244 */
+
+    --popover: 0 0% 100%; /* #FFFFFF */
+    --popover-foreground: 216 28% 21%; /* #263244 */
+
+    --primary: 212 72% 67%; /* #6FA8E8 */
+    --primary-hover: 211 62% 60%; /* #5A96D8 */
+    --primary-foreground: 0 0% 100%; /* #FFFFFF */
+
+    --secondary: 174 43% 73%; /* #9DD8D2 */
+    --secondary-foreground: 176 49% 17%; /* #16403D */
+
+    --muted: 210 70% 96%; /* #EEF5FC */
+    --muted-foreground: 213 16% 47%; /* #64758A */
+
+    --accent: 255 76% 84%; /* #C7B7F5 */
+    --accent-foreground: 257 37% 23%; /* #30244F */
+
+    --destructive: 348 63% 76%; /* #E89AAA */
+    --destructive-foreground: 0 0% 100%; /* #FFFFFF */
+
+    --success: 153 41% 63%; /* #7AC7A4 */
+    --success-foreground: 153 43% 16%; /* #173A2A */
+
+    --border: 210 62% 92%; /* #DDEAF7 */
+    --input: 210 63% 89%; /* #D3E4F5 */
+    --ring: 212 72% 67%; /* #6FA8E8 */
+
+    --radius: 0.6rem;
+
+    --sidebar-background: 212 76% 97%; /* #F0F6FD */
+    --sidebar-foreground: 216 28% 21%; /* #263244 */
+
+    --sidebar-primary: 212 72% 67%; /* #6FA8E8 */
+    --sidebar-primary-foreground: 0 0% 100%; /* #FFFFFF */
+
+    --sidebar-accent: 208 70% 95%; /* #E8F2FB */
+    --sidebar-accent-foreground: 216 28% 21%; /* #263244 */
+
+    --sidebar-border: 210 62% 92%; /* #DDEAF7 */
+    --sidebar-ring: 212 72% 67%; /* #6FA8E8 */
+} /* ===================== NIÑO MINIMALISTA - NOCHE ===================== */
+.theme-kids.dark {
+    --background: 221 39% 11%; /* #111827 */
+    --foreground: 204 45% 98%; /* #F7FAFC */
+
+    --card: 221 38% 15%; /* #172033 */
+    --card-foreground: 204 45% 98%; /* #F7FAFC */
+
+    --popover: 221 38% 15%; /* #172033 */
+    --popover-foreground: 204 45% 98%; /* #F7FAFC */
+
+    --primary: 210 74% 75%; /* #8FBEEE */
+    --primary-hover: 209 63% 66%; /* #74ACDF */
+    --primary-foreground: 211 53% 11%; /* #0D1B2A */
+
+    --secondary: 175 45% 76%; /* #A5DDD8 */
+    --secondary-foreground: 175 55% 13%; /* #0F3330 */
+
+    --muted: 221 35% 19%; /* #202B42 */
+    --muted-foreground: 214 31% 79%; /* #B8C7DA */
+
+    --accent: 259 75% 84%; /* #CBB8F5 */
+    --accent-foreground: 255 38% 15%; /* #1E1733 */
+
+    --destructive: 347 75% 80%; /* #F2A6B6 */
+    --destructive-foreground: 345 54% 14%; /* #351019 */
+
+    --success: 149 47% 71%; /* #94D8B5 */
+    --success-foreground: 153 51% 12%; /* #0F2E20 */
+
+    --border: 217 31% 25%; /* #2B3A52 */
+    --input: 217 31% 28%; /* #31425D */
+    --ring: 210 74% 75%; /* #8FBEEE */
+
+    --radius: 0.6rem;
+
+    --sidebar-background: 217 41% 10%; /* #0F1724 */
+    --sidebar-foreground: 204 45% 98%; /* #F7FAFC */
+
+    --sidebar-primary: 210 74% 75%; /* #8FBEEE */
+    --sidebar-primary-foreground: 211 53% 11%; /* #0D1B2A */
+
+    --sidebar-accent: 218 34% 17%; /* #1D283B */
+    --sidebar-accent-foreground: 214 31% 79%; /* #B8C7DA */
+
+    --sidebar-border: 217 31% 25%; /* #2B3A52 */
+    --sidebar-ring: 210 74% 75%; /* #8FBEEE */
+}
