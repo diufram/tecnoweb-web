@@ -42,7 +42,7 @@ const navItems = computed<AdminNavItem[]>(() => {
     if (props.actor === 'propietario') {
         return [
             { title: 'Dashboard', href: '/dashboard/propietario', icon: LayoutGrid },
-            { title: 'Productos', href: '#productos', icon: Package },
+            { title: 'Productos', href: '/propietario/productos', icon: Package },
             { title: 'Inventario', href: '#inventario', icon: Boxes },
             { title: 'Compras', href: '#compras', icon: ShoppingCart },
             { title: 'Clientes', href: '#clientes', icon: Users },

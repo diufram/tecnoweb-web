@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Propietario\ProductoController;
 use App\Models\Cliente;
 use App\Models\Compra;
 use App\Models\Producto;
@@ -55,6 +56,14 @@ Route::get('dashboard/cliente', function () {
         ],
     ]);
 })->middleware(['auth', 'verified', 'actor:cliente'])->name('dashboard.cliente');
+
+Route::middleware(['auth', 'verified', 'actor:propietario'])
+    ->prefix('propietario')
+    ->name('propietario.')
+    ->group(function () {
+        Route::resource('productos', ProductoController::class)
+            ->only(['index', 'create', 'store', 'edit', 'update']);
+    });
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
