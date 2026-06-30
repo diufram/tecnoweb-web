@@ -5,6 +5,10 @@
 
     RewriteEngine On
 
+    # RewriteBase must match the deployed subdirectory; ignored when request is at web root.
+    # Keep this value synchronized with APP_URL in the production .env file.
+    RewriteBase /inf513/grupo18sa/proyecto2/tecnoweb-web/public/
+
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
@@ -18,8 +22,16 @@
     RewriteCond %{REQUEST_URI} (.+)/$
     RewriteRule ^ %1 [L,R=301]
 
-    # Send Requests To Front Controller...
+    # Send Requests To Front Controller.
+    # Use the full subdirectory path so it works when this app is hosted
+    # under a non-root location (e.g. /inf513/.../public/).
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteCond %{REQUEST_FILENAME} !-f
-    RewriteRule ^ index.php [L]
+    RewriteRule ^ /inf513/grupo18sa/proyecto2/tecnoweb-web/public/index.php [L]
+</IfModule>
+
+# Fallback when mod_rewrite is not available: let PHP serve the request directly.
+<IfModule !mod_rewrite.c>
+    DirectoryIndex index.php
+    ErrorDocument 404 /inf513/grupo18sa/proyecto2/tecnoweb-web/public/index.php
 </IfModule>
