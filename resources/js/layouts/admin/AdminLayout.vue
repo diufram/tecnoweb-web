@@ -43,8 +43,8 @@ const navItems = computed<AdminNavItem[]>(() => {
         return [
             { title: 'Dashboard', href: '/dashboard/propietario', icon: LayoutGrid },
             { title: 'Productos', href: '/propietario/productos', icon: Package },
-            { title: 'Inventario', href: '#inventario', icon: Boxes },
-            { title: 'Compras', href: '#compras', icon: ShoppingCart },
+            { title: 'Inventario', href: '/propietario/inventario', icon: Boxes },
+            { title: 'Compras', href: '/propietario/compras', icon: ShoppingCart },
             { title: 'Clientes', href: '/propietario/clientes', icon: Users },
             { title: 'Proveedores', href: '/propietario/proveedores', icon: Truck },
             { title: 'Reportes', href: '#reportes', icon: BarChart3 },

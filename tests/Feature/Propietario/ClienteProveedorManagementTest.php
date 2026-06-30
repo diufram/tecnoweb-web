@@ -166,3 +166,75 @@ test('propietario can update a proveedor', function () {
         'empresa' => 'Proveedor Editado SRL',
     ]);
 });
+
+test('propietario can soft delete a cliente and its usuario', function () {
+    $usuario = Usuario::factory()->create([
+        'ci_nit' => '90010099',
+        'email' => 'cliente.delete@example.com',
+    ]);
+
+    $cliente = Cliente::create([
+        'id_usuario' => $usuario->id,
+        'linea_credito' => 1000,
+        'nit_facturacion' => '90010099',
+        'saldo_actual' => 0,
+    ]);
+
+    $this->actingAs(propietarioUserForActorManagement())
+        ->delete(route('propietario.clientes.destroy', $cliente))
+        ->assertRedirect(route('propietario.clientes.index'));
+
+    $this->assertSoftDeleted('cliente', ['id_usuario' => $cliente->id_usuario]);
+    $this->assertSoftDeleted('usuario', ['id' => $usuario->id]);
+});
+
+test('propietario can soft delete a proveedor and its usuario', function () {
+    $usuario = Usuario::factory()->create([
+        'ci_nit' => '90020099',
+        'email' => 'proveedor.delete@example.com',
+    ]);
+
+    $proveedor = Proveedor::create([
+        'id_usuario' => $usuario->id,
+        'empresa' => 'Proveedor Delete SRL',
+    ]);
+
+    $this->actingAs(propietarioUserForActorManagement())
+        ->delete(route('propietario.proveedores.destroy', $proveedor))
+        ->assertRedirect(route('propietario.proveedores.index'));
+
+    $this->assertSoftDeleted('proveedor', ['id_usuario' => $proveedor->id_usuario]);
+    $this->assertSoftDeleted('usuario', ['id' => $usuario->id]);
+});
+
+test('non propietario cannot delete cliente or proveedor', function () {
+    $proveedorUser = Usuario::factory()->create();
+    Proveedor::create([
+        'id_usuario' => $proveedorUser->id,
+        'empresa' => 'Otro Proveedor SRL',
+    ]);
+
+    $clienteUsuario = Usuario::factory()->create();
+    $cliente = Cliente::create([
+        'id_usuario' => $clienteUsuario->id,
+        'linea_credito' => 100,
+        'nit_facturacion' => '90030099',
+        'saldo_actual' => 0,
+    ]);
+
+    $proveedorUsuario = Usuario::factory()->create();
+    $proveedor = Proveedor::create([
+        'id_usuario' => $proveedorUsuario->id,
+        'empresa' => 'Otro Proveedor Delete',
+    ]);
+
+    $this->actingAs($proveedorUser)
+        ->delete(route('propietario.clientes.destroy', $cliente))
+        ->assertForbidden();
+    $this->actingAs($proveedorUser)
+        ->delete(route('propietario.proveedores.destroy', $proveedor))
+        ->assertForbidden();
+
+    $this->assertNotSoftDeleted('cliente', ['id_usuario' => $cliente->id_usuario]);
+    $this->assertNotSoftDeleted('proveedor', ['id_usuario' => $proveedor->id_usuario]);
+});

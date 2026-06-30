@@ -100,6 +100,16 @@ class ProveedorController extends Controller
         return redirect()->route('propietario.proveedores.index');
     }
 
+    public function destroy(Proveedor $proveedor): RedirectResponse
+    {
+        DB::transaction(function () use ($proveedor) {
+            $proveedor->delete();
+            $proveedor->usuario->delete();
+        });
+
+        return redirect()->route('propietario.proveedores.index');
+    }
+
     /**
      * @return array<string, mixed>
      */

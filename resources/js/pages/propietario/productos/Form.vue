@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import AdminLayout from '@/layouts/admin/AdminLayout.vue';
@@ -106,59 +105,45 @@ const submit = veeForm.handleSubmit((values) => {
                 </Button>
             </div>
 
-            <Card class="max-w-2xl">
-                <CardHeader>
-                    <CardTitle>Datos del producto</CardTitle>
-                    <CardDescription>Estos datos se usaran en inventario y compras.</CardDescription>
-                </CardHeader>
+            <div class="max-w-2xl space-y-6">
+                <section class="space-y-1">
+                    <h2 class="text-xl font-semibold tracking-tight">Datos del producto</h2>
+                    <p class="text-sm text-muted-foreground">Estos datos se usaran en inventario y compras.</p>
+                </section>
 
-                <CardContent>
-                    <form class="space-y-6" @submit="submit">
-                        <FormField v-slot="{ componentField }" name="nombre_comercial">
-                            <FormItem>
-                                <FormLabel>Nombre comercial</FormLabel>
-                                <FormControl>
-                                    <Input
-                                        v-bind="componentField"
-                                        autocomplete="off"
-                                        maxlength="255"
-                                        placeholder="Ej. Paracetamol 500mg"
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        </FormField>
+                <form class="space-y-6" @submit="submit">
+                    <FormField v-slot="{ componentField }" name="nombre_comercial">
+                        <FormItem>
+                            <FormLabel>Nombre comercial</FormLabel>
+                            <FormControl>
+                                <Input v-bind="componentField" autocomplete="off" maxlength="255" placeholder="Ej. Paracetamol 500mg" />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    </FormField>
 
-                        <FormField v-slot="{ componentField }" name="stock_actual">
-                            <FormItem>
-                                <FormLabel>Stock actual</FormLabel>
-                                <FormControl>
-                                    <Input
-                                        v-bind="componentField"
-                                        inputmode="numeric"
-                                        min="0"
-                                        max="1000000"
-                                        placeholder="0"
-                                        type="number"
-                                    />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        </FormField>
+                    <FormField v-slot="{ componentField }" name="stock_actual">
+                        <FormItem>
+                            <FormLabel>Stock actual</FormLabel>
+                            <FormControl>
+                                <Input v-bind="componentField" inputmode="numeric" min="0" max="1000000" placeholder="0" type="number" />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    </FormField>
 
-                        <div class="flex items-center gap-3">
-                            <Button :disabled="form.processing">
-                                <Save class="size-4" />
-                                {{ isEditing ? 'Guardar cambios' : 'Crear producto' }}
-                            </Button>
+                    <div class="flex items-center gap-3">
+                        <Button :disabled="form.processing">
+                            <Save class="size-4" />
+                            {{ isEditing ? 'Guardar cambios' : 'Crear producto' }}
+                        </Button>
 
-                            <Button as-child variant="ghost" type="button">
-                                <Link :href="route('propietario.productos.index')">Cancelar</Link>
-                            </Button>
-                        </div>
-                    </form>
-                </CardContent>
-            </Card>
+                        <Button as-child variant="ghost" type="button">
+                            <Link :href="route('propietario.productos.index')">Cancelar</Link>
+                        </Button>
+                    </div>
+                </form>
+            </div>
         </div>
     </AdminLayout>
 </template>

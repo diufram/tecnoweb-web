@@ -110,6 +110,16 @@ class ClienteController extends Controller
         return redirect()->route('propietario.clientes.index');
     }
 
+    public function destroy(Cliente $cliente): RedirectResponse
+    {
+        DB::transaction(function () use ($cliente) {
+            $cliente->delete();
+            $cliente->usuario->delete();
+        });
+
+        return redirect()->route('propietario.clientes.index');
+    }
+
     /**
      * @return array<string, mixed>
      */

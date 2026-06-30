@@ -102,3 +102,38 @@ test('propietario can update a product', function () {
         'stock_actual' => 80,
     ]);
 });
+
+test('propietario can soft delete a product', function () {
+    $producto = Producto::create([
+        'nombre_comercial' => 'Suero Oral 500ml',
+        'stock_actual' => 10,
+    ]);
+
+    $this->actingAs(propietarioUser())
+        ->delete(route('propietario.productos.destroy', $producto))
+        ->assertRedirect(route('propietario.productos.index'));
+
+    $this->assertSoftDeleted('producto', ['id' => $producto->id]);
+    expect(Producto::find($producto->id))->toBeNull();
+    expect(Producto::withTrashed()->find($producto->id))->not->toBeNull();
+});
+
+test('non propietario cannot delete products', function () {
+    $user = Usuario::factory()->create();
+
+    Proveedor::create([
+        'id_usuario' => $user->id,
+        'empresa' => 'Proveedor Test',
+    ]);
+
+    $producto = Producto::create([
+        'nombre_comercial' => 'Aspirina 500mg',
+        'stock_actual' => 5,
+    ]);
+
+    $this->actingAs($user)
+        ->delete(route('propietario.productos.destroy', $producto))
+        ->assertForbidden();
+
+    $this->assertNotSoftDeleted('producto', ['id' => $producto->id]);
+});

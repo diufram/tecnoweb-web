@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import AdminLayout from '@/layouts/admin/AdminLayout.vue';
@@ -121,13 +120,13 @@ const submit = veeForm.handleSubmit((values) => {
                 </Button>
             </div>
 
-            <Card class="max-w-4xl">
-                <CardHeader>
-                    <CardTitle>Datos del cliente</CardTitle>
-                    <CardDescription>La contrasena es obligatoria al crear y opcional al editar.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <form class="grid gap-6" @submit="submit">
+            <div class="max-w-4xl space-y-6">
+                <section class="space-y-1">
+                    <h2 class="text-xl font-semibold tracking-tight">Datos del cliente</h2>
+                    <p class="text-sm text-muted-foreground">La contrasena es obligatoria al crear y opcional al editar.</p>
+                </section>
+
+                <form class="grid gap-6" @submit="submit">
                         <div class="grid gap-4 md:grid-cols-2">
                             <FormField v-slot="{ componentField }" name="ci_nit"><FormItem><FormLabel>CI/NIT</FormLabel><FormControl><Input v-bind="componentField" /></FormControl><FormMessage /></FormItem></FormField>
                             <FormField v-slot="{ componentField }" name="nombre"><FormItem><FormLabel>Nombre</FormLabel><FormControl><Input v-bind="componentField" /></FormControl><FormMessage /></FormItem></FormField>
@@ -145,9 +144,8 @@ const submit = veeForm.handleSubmit((values) => {
                             <Button :disabled="form.processing"><Save class="size-4" /> {{ isEditing ? 'Guardar cambios' : 'Crear cliente' }}</Button>
                             <Button as-child variant="ghost" type="button"><Link :href="route('propietario.clientes.index')">Cancelar</Link></Button>
                         </div>
-                    </form>
-                </CardContent>
-            </Card>
+                </form>
+            </div>
         </div>
     </AdminLayout>
 </template>

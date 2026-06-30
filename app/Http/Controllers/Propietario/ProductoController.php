@@ -56,6 +56,13 @@ class ProductoController extends Controller
         return redirect()->route('propietario.productos.index');
     }
 
+    public function destroy(Producto $producto): RedirectResponse
+    {
+        $producto->delete();
+
+        return redirect()->route('propietario.productos.index');
+    }
+
     /**
      * @return array{nombre_comercial: string, stock_actual: int}
      */
