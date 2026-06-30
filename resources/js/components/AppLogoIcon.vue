@@ -10,8 +10,10 @@ interface Props {
 }
 
 defineProps<Props>();
+
+const baseUrl = import.meta.env.BASE_URL;
 </script>
 
 <template>
-    <img src="/logo.png" alt="SanaMed" :class="className" v-bind="$attrs" />
+    <img :src="`${baseUrl}logo.png`" alt="SanaMed" :class="className" v-bind="$attrs" />
 </template>
