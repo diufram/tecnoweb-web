@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use Closure;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -25,6 +26,23 @@ class HandleInertiaRequests extends Middleware
     public function version(Request $request): ?string
     {
         return parent::version($request);
+    }
+
+    /**
+     * Keep Inertia's browser URL under the deployed subdirectory.
+     */
+    public function urlResolver(): ?Closure
+    {
+        return function (Request $request): string {
+            $requestUri = $request->getRequestUri();
+            $basePath = rtrim((string) parse_url((string) config('app.url'), PHP_URL_PATH), '/');
+
+            if ($basePath === '' || $basePath === '/' || str_starts_with($requestUri, $basePath.'/') || $requestUri === $basePath) {
+                return $requestUri;
+            }
+
+            return $basePath.($requestUri === '/' ? '/' : $requestUri);
+        };
     }
 
     /**
