@@ -11,6 +11,7 @@ use App\Models\Producto;
 use App\Models\Propietario;
 use App\Models\Venta;
 use App\Models\VentaDetalle;
+use App\Services\PagoFacilService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -19,6 +20,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
+use RuntimeException;
 
 class CarritoController extends Controller
 {
@@ -105,7 +107,7 @@ class CarritoController extends Controller
         return back();
     }
 
-    public function checkout(Request $request): RedirectResponse
+    public function checkout(Request $request, PagoFacilService $pagoFacilService): RedirectResponse
     {
         $validated = $request->validate([
             'tipo_pago' => ['required', Rule::in(self::TIPOS_PAGO)],
@@ -127,8 +129,11 @@ class CarritoController extends Controller
             ]);
         }
 
-        DB::transaction(function () use ($validated, $request, $cart) {
+        $pagoQr = null;
+
+        DB::transaction(function () use ($validated, $request, $cart, $pagoFacilService, &$pagoQr) {
             $cliente = Cliente::query()
+                ->with('usuario')
                 ->whereKey($request->user()->cliente?->id_usuario)
                 ->lockForUpdate()
                 ->firstOrFail();
@@ -186,7 +191,7 @@ class CarritoController extends Controller
             }
 
             $venta = Venta::create([
-                'estado_venta' => 'COMPLETADA',
+                'estado_venta' => 'PENDIENTE_PAGO',
                 'fecha' => now()->toDateString(),
                 'total' => $total,
                 'id_cliente' => $cliente->id_usuario,
@@ -207,14 +212,48 @@ class CarritoController extends Controller
             });
 
             $plan = PlanPago::create([
-                'estado_plan' => $tipoPago === 'CONTADO' ? 'PAGADO' : 'PENDIENTE',
+                'estado_plan' => 'PENDIENTE',
                 'tipo_pago' => $tipoPago,
                 'id_venta' => $venta->id,
             ]);
 
-            $tipoPago === 'CONTADO'
-                ? $this->crearCuotaContado($plan, $total)
-                : $this->crearCuotasCredito($plan, $total, (int) $validated['cuotas']);
+            $paymentNumber = PagoFacilService::generarPaymentNumber();
+            $montoQr = $tipoPago === 'CONTADO'
+                ? $total
+                : $this->calcularMontoPrimeraCuota($total, (int) $validated['cuotas']);
+            $concepto = $tipoPago === 'CONTADO'
+                ? 'Venta SanaMed - '.$detalles->count().' productos'
+                : 'Primera cuota venta SanaMed - '.$detalles->count().' productos';
+            try {
+                $pagoData = $pagoFacilService->generarQr(
+                    $montoQr,
+                    $concepto,
+                    $cliente->usuario->nombre,
+                    $cliente->usuario->ci_nit,
+                    $cliente->usuario->telefono,
+                    $cliente->usuario->email,
+                    (string) $cliente->id_usuario,
+                    $paymentNumber,
+                );
+            } catch (RuntimeException $exception) {
+                throw ValidationException::withMessages([
+                    'pago' => $exception->getMessage(),
+                ]);
+            }
+
+            $cuotaQr = $tipoPago === 'CONTADO'
+                ? $this->crearCuotaContado($plan, $total, $pagoData['paymentNumber'])
+                : $this->crearCuotasCredito($plan, $total, (int) $validated['cuotas'], $pagoData['paymentNumber']);
+
+            $pagoQr = [
+                'qrBase64' => $pagoData['qrBase64'],
+                'paymentNumber' => $pagoData['paymentNumber'],
+                'transactionId' => $pagoData['transactionId'],
+                'monto' => $montoQr,
+                'venta_id' => $venta->id,
+                'cuota_id' => $cuotaQr->id,
+                'nro_cuota' => $cuotaQr->nro_cuota,
+            ];
 
             if ($tipoPago === 'CREDITO') {
                 $cliente->increment('saldo_actual', $total);
@@ -223,7 +262,7 @@ class CarritoController extends Controller
 
         $request->session()->forget(self::SESSION_KEY);
 
-        return redirect()->route('cliente.compras');
+        return redirect()->route('cliente.pagos')->with('pagoQr', $pagoQr);
     }
 
     /** @return array<string, int> */
@@ -286,35 +325,50 @@ class CarritoController extends Controller
         return $items;
     }
 
-    private function crearCuotaContado(PlanPago $plan, float $total): void
+    private function crearCuotaContado(PlanPago $plan, float $total, string $paymentNumber): Cuota
     {
-        Cuota::create([
+        return Cuota::create([
             'id_plan_pago' => $plan->id,
             'nro_cuota' => 1,
-            'fecha_vencimiento' => now()->toDateString(),
+            'fecha_vencimiento' => now()->addDay()->toDateString(),
             'monto' => $total,
-            'estado_cuota' => 'PAGADA',
-            'id_transaccion_pago_facil' => 'CONTADO-'.$plan->id,
+            'estado_cuota' => 'PENDIENTE',
+            'id_transaccion_pago_facil' => $paymentNumber,
         ]);
     }
 
-    private function crearCuotasCredito(PlanPago $plan, float $total, int $cuotas): void
+    private function crearCuotasCredito(PlanPago $plan, float $total, int $cuotas, string $paymentNumber): Cuota
     {
         $montoBase = floor(($total / $cuotas) * 100) / 100;
         $acumulado = 0;
+        $primeraCuota = null;
 
         for ($nroCuota = 1; $nroCuota <= $cuotas; $nroCuota++) {
             $monto = $nroCuota === $cuotas ? round($total - $acumulado, 2) : $montoBase;
             $acumulado += $monto;
 
-            Cuota::create([
+            $cuota = Cuota::create([
                 'id_plan_pago' => $plan->id,
                 'nro_cuota' => $nroCuota,
                 'fecha_vencimiento' => now()->addMonths($nroCuota)->toDateString(),
                 'monto' => $monto,
                 'estado_cuota' => 'PENDIENTE',
+                'id_transaccion_pago_facil' => $nroCuota === 1 ? $paymentNumber : null,
             ]);
+
+            $primeraCuota ??= $cuota;
         }
+
+        return $primeraCuota;
+    }
+
+    private function calcularMontoPrimeraCuota(float $total, int $cuotas): float
+    {
+        if ($cuotas <= 1) {
+            return round($total, 2);
+        }
+
+        return floor(($total / $cuotas) * 100) / 100;
     }
 
     private function syncProductStock(int $productoId): void

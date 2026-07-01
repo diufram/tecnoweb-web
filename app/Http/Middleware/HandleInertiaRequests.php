@@ -63,6 +63,9 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
+            'flash' => [
+                'pagoQr' => fn () => $request->session()->get('pagoQr'),
+            ],
         ]);
     }
 }

@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Cliente\CarritoController;
+use App\Http\Controllers\Cliente\PagoController as ClientePagoController;
+use App\Http\Controllers\PagoFacilCallbackController;
 use App\Http\Controllers\Propietario\ClienteController;
 use App\Http\Controllers\Propietario\CompraController;
 use App\Http\Controllers\Propietario\InventarioController;
@@ -66,6 +68,8 @@ Route::get('dashboard/cliente', function () {
         ],
     ]);
 })->middleware(['auth', 'verified', 'actor:cliente'])->name('dashboard.cliente');
+
+Route::post('callbacks/pagofacil', PagoFacilCallbackController::class)->name('callbacks.pagofacil');
 
 Route::middleware(['auth', 'verified', 'actor:cliente'])
     ->prefix('cliente')
@@ -164,7 +168,14 @@ Route::middleware(['auth', 'verified', 'actor:cliente'])
                         ],
                         'total_pagado' => $cuotasPagadas->sum('monto'),
                         'total_pendiente' => $cuotasPendientes->sum('monto'),
-                        'proxima_cuota' => $cuotasPendientes->first()?->only(['nro_cuota', 'fecha_vencimiento', 'monto', 'estado_cuota']),
+                        'proxima_cuota' => $cuotasPendientes->first() ? [
+                            'id' => $cuotasPendientes->first()->id,
+                            'nro_cuota' => $cuotasPendientes->first()->nro_cuota,
+                            'fecha_vencimiento' => $cuotasPendientes->first()->fecha_vencimiento,
+                            'monto' => $cuotasPendientes->first()->monto,
+                            'estado_cuota' => $cuotasPendientes->first()->estado_cuota,
+                            'id_transaccion_pago_facil' => $cuotasPendientes->first()->id_transaccion_pago_facil,
+                        ] : null,
                         'cuotas' => $plan->cuotas->map(fn ($cuota) => [
                             'id' => $cuota->id,
                             'nro_cuota' => $cuota->nro_cuota,
@@ -180,6 +191,7 @@ Route::middleware(['auth', 'verified', 'actor:cliente'])
                 'planes' => $planes,
             ]);
         })->name('pagos');
+        Route::post('pagos/{venta}/qr', [ClientePagoController::class, 'generarQr'])->name('pagos.qr');
     });
 
 Route::middleware(['auth', 'verified', 'actor:propietario'])

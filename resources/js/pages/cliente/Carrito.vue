@@ -180,6 +180,7 @@ const checkout = () => {
                         </div>
 
                         <p v-if="checkoutForm.errors.carrito" class="text-sm font-medium text-destructive">{{ checkoutForm.errors.carrito }}</p>
+                        <p v-if="checkoutForm.errors.pago" class="text-sm font-medium text-destructive">{{ checkoutForm.errors.pago }}</p>
 
                         <Button class="w-full" type="submit" :disabled="checkoutForm.processing || creditoInsuficiente">
                             <Loader2 v-if="checkoutForm.processing" class="size-4 animate-spin" />
