@@ -211,14 +211,6 @@ Route::middleware(['auth', 'verified', 'actor:propietario'])
         Route::resource('proveedores', ProveedorController::class)
             ->parameters(['proveedores' => 'proveedor'])
             ->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
-        Route::resource('inventario', InventarioController::class)
-            ->parameters(['inventario' => 'inventario'])
-            ->only(['index', 'create', 'store', 'edit', 'update']);
-        Route::resource('compras', CompraController::class)
-            ->only(['index', 'create', 'store', 'edit', 'update']);
-        Route::resource('proveedores', ProveedorController::class)
-            ->parameters(['proveedores' => 'proveedor'])
-            ->only(['index', 'create', 'store', 'edit', 'update']);
     });
 
 require __DIR__.'/settings.php';

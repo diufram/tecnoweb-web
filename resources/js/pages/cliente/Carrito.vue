@@ -4,7 +4,7 @@ import PageHeader from '@/components/shared/PageHeader.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { useFormatters } from '@/composables/useFormatters';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import CustomerLayout from '@/layouts/customer/CustomerLayout.vue';
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import { CreditCard, Loader2, PackageSearch, ShoppingCart, Trash2 } from 'lucide-vue-next';
@@ -42,7 +42,7 @@ const quantities = reactive<Record<number, number>>(Object.fromEntries(props.ite
 
 const checkoutForm = useForm({
     tipo_pago: 'CONTADO',
-    cuotas: 3,
+    cuotas: '3',
 });
 
 const totalNumber = computed(() => Number(props.total));
@@ -134,13 +134,15 @@ const checkout = () => {
 
                         <label class="grid gap-2 text-sm font-medium">
                             Tipo de pago
-                            <select
-                                v-model="checkoutForm.tipo_pago"
-                                class="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                            >
-                                <option value="CONTADO">Contado</option>
-                                <option value="CREDITO">Crédito en cuotas</option>
-                            </select>
+                            <Select v-model="checkoutForm.tipo_pago">
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Selecciona tipo de pago" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="CONTADO">Contado</SelectItem>
+                                    <SelectItem value="CREDITO">Crédito en cuotas</SelectItem>
+                                </SelectContent>
+                            </Select>
                             <span v-if="checkoutForm.errors.tipo_pago" class="text-sm font-normal text-destructive">{{
                                 checkoutForm.errors.tipo_pago
                             }}</span>
@@ -148,16 +150,18 @@ const checkout = () => {
 
                         <label v-if="checkoutForm.tipo_pago === 'CREDITO'" class="grid gap-2 text-sm font-medium">
                             Número de cuotas
-                            <select
-                                v-model.number="checkoutForm.cuotas"
-                                class="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                            >
-                                <option :value="1">1 cuota</option>
-                                <option :value="2">2 cuotas</option>
-                                <option :value="3">3 cuotas</option>
-                                <option :value="6">6 cuotas</option>
-                                <option :value="12">12 cuotas</option>
-                            </select>
+                            <Select v-model="checkoutForm.cuotas">
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Selecciona cuotas" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="1">1 cuota</SelectItem>
+                                    <SelectItem value="2">2 cuotas</SelectItem>
+                                    <SelectItem value="3">3 cuotas</SelectItem>
+                                    <SelectItem value="6">6 cuotas</SelectItem>
+                                    <SelectItem value="12">12 cuotas</SelectItem>
+                                </SelectContent>
+                            </Select>
                             <span v-if="checkoutForm.errors.cuotas" class="text-sm font-normal text-destructive">{{
                                 checkoutForm.errors.cuotas
                             }}</span>

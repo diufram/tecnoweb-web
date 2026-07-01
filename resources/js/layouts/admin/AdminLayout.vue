@@ -38,6 +38,19 @@ const page = usePage();
 const actorLabel = computed(() => (props.actor === 'propietario' ? 'Propietario' : 'Proveedor'));
 const dashboardHref = computed(() => (props.actor === 'propietario' ? route('dashboard.propietario') : route('dashboard.proveedor')));
 
+const stripOrigin = (href: string) => href.replace(/^https?:\/\/[^/]+/, '');
+
+const isActive = (href: string) => {
+    if (href.startsWith('#')) {
+        return false;
+    }
+
+    const path = stripOrigin(href);
+    const current = page.url.split('?')[0] ?? '';
+
+    return current === path || current.startsWith(`${path}/`);
+};
+
 const navItems = computed<AdminNavItem[]>(() => {
     if (props.actor === 'propietario') {
         return [
@@ -86,7 +99,7 @@ const navItems = computed<AdminNavItem[]>(() => {
                     <SidebarGroupLabel>Gestión</SidebarGroupLabel>
                     <SidebarMenu>
                         <SidebarMenuItem v-for="item in navItems" :key="item.title">
-                            <SidebarMenuButton as-child :is-active="item.href === page.url">
+                            <SidebarMenuButton as-child :is-active="isActive(item.href)">
                                 <Link :href="item.href">
                                     <component :is="item.icon" />
                                     <span>{{ item.title }}</span>
