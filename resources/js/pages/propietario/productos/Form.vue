@@ -28,7 +28,7 @@ const title = computed(() => (isEditing.value ? 'Editar producto' : 'Crear produ
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Productos',
-        href: '/propietario/productos',
+        href: route('propietario.productos.index'),
     },
     {
         title: title.value,

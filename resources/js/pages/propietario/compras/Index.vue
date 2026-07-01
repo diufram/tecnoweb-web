@@ -18,7 +18,7 @@ interface Compra {
 
 defineProps<{ compras: Compra[] }>();
 
-const breadcrumbs: BreadcrumbItem[] = [{ title: 'Compras', href: '/propietario/compras' }];
+const breadcrumbs: BreadcrumbItem[] = [{ title: 'Compras', href: route('propietario.compras.index') }];
 </script>
 
 <template>

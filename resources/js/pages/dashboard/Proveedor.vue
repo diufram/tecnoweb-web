@@ -16,7 +16,7 @@ defineProps<{
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Dashboard proveedor',
-        href: '/dashboard/proveedor',
+        href: route('dashboard.proveedor'),
     },
 ];
 </script>

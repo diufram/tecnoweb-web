@@ -19,7 +19,7 @@ const props = defineProps<{ mode: 'create' | 'edit'; inventario: Inventario | nu
 const isEditing = computed(() => props.mode === 'edit');
 const title = computed(() => (isEditing.value ? 'Editar inventario' : 'Crear inventario'));
 const today = new Date().toISOString().slice(0, 10);
-const breadcrumbs: BreadcrumbItem[] = [{ title: 'Inventario', href: '/propietario/inventario' }, { title: title.value, href: '#' }];
+const breadcrumbs: BreadcrumbItem[] = [{ title: 'Inventario', href: route('propietario.inventario.index') }, { title: title.value, href: '#' }];
 const selectClass = 'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base transition-colors focus-visible:border-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 aria-[invalid=true]:border-destructive aria-[invalid=true]:focus-visible:border-destructive md:text-sm';
 
 const schema = toTypedSchema(z.object({

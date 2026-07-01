@@ -36,31 +36,33 @@ const props = defineProps<{
 const page = usePage();
 
 const actorLabel = computed(() => (props.actor === 'propietario' ? 'Propietario' : 'Proveedor'));
-const dashboardHref = computed(() => (props.actor === 'propietario' ? '/dashboard/propietario' : '/dashboard/proveedor'));
+const dashboardHref = computed(() =>
+    props.actor === 'propietario' ? route('dashboard.propietario') : route('dashboard.proveedor'),
+);
 
 const navItems = computed<AdminNavItem[]>(() => {
     if (props.actor === 'propietario') {
         return [
-            { title: 'Dashboard', href: '/dashboard/propietario', icon: LayoutGrid },
-            { title: 'Productos', href: '/propietario/productos', icon: Package },
-            { title: 'Inventario', href: '/propietario/inventario', icon: Boxes },
-            { title: 'Compras', href: '/propietario/compras', icon: ShoppingCart },
-            { title: 'Clientes', href: '/propietario/clientes', icon: Users },
-            { title: 'Proveedores', href: '/propietario/proveedores', icon: Truck },
+            { title: 'Dashboard', href: route('dashboard.propietario'), icon: LayoutGrid },
+            { title: 'Productos', href: route('propietario.productos.index'), icon: Package },
+            { title: 'Inventario', href: route('propietario.inventario.index'), icon: Boxes },
+            { title: 'Compras', href: route('propietario.compras.index'), icon: ShoppingCart },
+            { title: 'Clientes', href: route('propietario.clientes.index'), icon: Users },
+            { title: 'Proveedores', href: route('propietario.proveedores.index'), icon: Truck },
             { title: 'Reportes', href: '#reportes', icon: BarChart3 },
-            { title: 'Perfil', href: '/settings/profile', icon: UserRound },
-            { title: 'Apariencia', href: '/settings/appearance', icon: Palette },
+            { title: 'Perfil', href: route('profile.edit'), icon: UserRound },
+            { title: 'Apariencia', href: route('appearance'), icon: Palette },
         ];
     }
 
     return [
-        { title: 'Dashboard', href: '/dashboard/proveedor', icon: LayoutGrid },
+        { title: 'Dashboard', href: route('dashboard.proveedor'), icon: LayoutGrid },
         { title: 'Solicitudes', href: '#solicitudes', icon: FileText },
         { title: 'Contraofertas', href: '#contraofertas', icon: Handshake },
         { title: 'Compras', href: '#compras', icon: ShoppingCart },
         { title: 'Historial', href: '#historial', icon: BarChart3 },
-        { title: 'Perfil', href: '/settings/profile', icon: UserRound },
-        { title: 'Apariencia', href: '/settings/appearance', icon: Palette },
+        { title: 'Perfil', href: route('profile.edit'), icon: UserRound },
+        { title: 'Apariencia', href: route('appearance'), icon: Palette },
     ];
 });
 </script>

@@ -34,7 +34,7 @@ const isEditing = computed(() => props.mode === 'edit');
 const title = computed(() => (isEditing.value ? 'Editar cliente' : 'Crear cliente'));
 
 const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Clientes', href: '/propietario/clientes' },
+    { title: 'Clientes', href: route('propietario.clientes.index') },
     { title: title.value, href: '#' },
 ];
 

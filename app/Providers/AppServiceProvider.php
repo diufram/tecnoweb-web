@@ -23,6 +23,10 @@ class AppServiceProvider extends ServiceProvider
             return;
         }
 
+        if ($this->forceRootUrlFromAppUrl()) {
+            return;
+        }
+
         $request = $this->app->make('request');
         $base = rtrim($request->getBaseUrl(), '/');
 
@@ -35,6 +39,25 @@ class AppServiceProvider extends ServiceProvider
             URL::forceRootUrl($scheme.'://'.$request->getHost().$base);
             URL::forceScheme($scheme);
         }
+    }
+
+    private function forceRootUrlFromAppUrl(): bool
+    {
+        $appUrl = rtrim((string) config('app.url'), '/');
+        $path = parse_url($appUrl, PHP_URL_PATH);
+
+        if (! is_string($path) || $path === '' || $path === '/') {
+            return false;
+        }
+
+        URL::forceRootUrl($appUrl);
+
+        $scheme = parse_url($appUrl, PHP_URL_SCHEME);
+        if (is_string($scheme) && $scheme !== '') {
+            URL::forceScheme($scheme);
+        }
+
+        return true;
     }
 
     private function detectBaseFromScriptName(): string

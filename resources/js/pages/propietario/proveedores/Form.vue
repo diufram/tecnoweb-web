@@ -21,7 +21,7 @@ const props = defineProps<{ mode: 'create' | 'edit'; proveedor: Proveedor | null
 
 const isEditing = computed(() => props.mode === 'edit');
 const title = computed(() => (isEditing.value ? 'Editar proveedor' : 'Crear proveedor'));
-const breadcrumbs: BreadcrumbItem[] = [{ title: 'Proveedores', href: '/propietario/proveedores' }, { title: title.value, href: '#' }];
+const breadcrumbs: BreadcrumbItem[] = [{ title: 'Proveedores', href: route('propietario.proveedores.index') }, { title: title.value, href: '#' }];
 
 const proveedorSchema = toTypedSchema(
     z

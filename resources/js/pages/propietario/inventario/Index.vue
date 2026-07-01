@@ -15,7 +15,7 @@ interface Inventario {
 }
 
 defineProps<{ inventarios: Inventario[] }>();
-const breadcrumbs: BreadcrumbItem[] = [{ title: 'Inventario', href: '/propietario/inventario' }];
+const breadcrumbs: BreadcrumbItem[] = [{ title: 'Inventario', href: route('propietario.inventario.index') }];
 </script>
 
 <template>

@@ -12,12 +12,12 @@ const page = usePage<SharedData>();
 const user = page.props.auth.user as User;
 
 const navItems = [
-    { title: 'Inicio', href: '/dashboard/cliente', icon: Home },
+    { title: 'Inicio', href: route('dashboard.cliente'), icon: Home },
     { title: 'Catálogo', href: '#catalogo', icon: PackageSearch },
     { title: 'Mis compras', href: '#compras', icon: ReceiptText },
     { title: 'Pagos', href: '#pagos', icon: CreditCard },
-    { title: 'Perfil', href: '/settings/profile', icon: UserRound },
-    { title: 'Apariencia', href: '/settings/appearance', icon: Palette },
+    { title: 'Perfil', href: route('profile.edit'), icon: UserRound },
+    { title: 'Apariencia', href: route('appearance'), icon: Palette },
 ];
 </script>
 

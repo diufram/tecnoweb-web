@@ -10,18 +10,20 @@ function resolveBase(mode: string): string {
     const appUrl = env.APP_URL ?? env.VITE_APP_URL ?? '';
 
     if (!appUrl) {
-        return '/';
+        return '/build/';
     }
 
     try {
         const pathname = new URL(appUrl).pathname;
         if (!pathname || pathname === '/') {
-            return '/';
+            return '/build/';
         }
 
-        return pathname.endsWith('/') ? pathname : `${pathname}/`;
+        const basePath = pathname.endsWith('/') ? pathname : `${pathname}/`;
+
+        return `${basePath}build/`;
     } catch {
-        return '/';
+        return '/build/';
     }
 }
 

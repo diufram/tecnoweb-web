@@ -19,7 +19,7 @@ const props = defineProps<{ mode: 'create' | 'edit'; compra: Compra | null; prov
 const isEditing = computed(() => props.mode === 'edit');
 const title = computed(() => (isEditing.value ? 'Editar compra' : 'Crear compra'));
 const today = new Date().toISOString().slice(0, 10);
-const breadcrumbs: BreadcrumbItem[] = [{ title: 'Compras', href: '/propietario/compras' }, { title: title.value, href: '#' }];
+const breadcrumbs: BreadcrumbItem[] = [{ title: 'Compras', href: route('propietario.compras.index') }, { title: title.value, href: '#' }];
 
 const selectClass = 'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base transition-colors focus-visible:border-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 aria-[invalid=true]:border-destructive aria-[invalid=true]:focus-visible:border-destructive md:text-sm';
 const textareaClass = 'flex min-h-24 w-full rounded-md border border-input bg-background px-3 py-2 text-base transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 aria-[invalid=true]:border-destructive aria-[invalid=true]:focus-visible:border-destructive md:text-sm';

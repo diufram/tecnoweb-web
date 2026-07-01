@@ -11,9 +11,9 @@ interface Props {
 
 defineProps<Props>();
 
-const baseUrl = import.meta.env.BASE_URL;
+const appUrl = document.querySelector<HTMLMetaElement>('meta[name="app-url"]')?.content.replace(/\/$/, '') ?? '';
 </script>
 
 <template>
-    <img :src="`${baseUrl}logo.png`" alt="SanaMed" :class="className" v-bind="$attrs" />
+    <img :src="`${appUrl}/logo.png`" alt="SanaMed" :class="className" v-bind="$attrs" />
 </template>

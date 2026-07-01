@@ -40,7 +40,7 @@ defineProps<{
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Clientes',
-        href: '/propietario/clientes',
+        href: route('propietario.clientes.index'),
     },
 ];
 

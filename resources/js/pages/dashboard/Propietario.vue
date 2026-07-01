@@ -17,7 +17,7 @@ defineProps<{
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Dashboard propietario',
-        href: '/dashboard/propietario',
+        href: route('dashboard.propietario'),
     },
 ];
 </script>
