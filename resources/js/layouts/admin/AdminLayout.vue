@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/sidebar';
 import type { BreadcrumbItemType } from '@/types';
 import { Link, usePage } from '@inertiajs/vue3';
-import { BarChart3, Boxes, FileText, Handshake, LayoutGrid, Package, Palette, ShoppingCart, Truck, UserRound, Users } from 'lucide-vue-next';
+import { BarChart3, Barcode, Boxes, FileText, Handshake, LayoutGrid, Package, Palette, ShoppingCart, Truck, UserRound, Users } from 'lucide-vue-next';
 import { computed, type Component } from 'vue';
 
 type Actor = 'propietario' | 'proveedor';
@@ -56,6 +56,7 @@ const navItems = computed<AdminNavItem[]>(() => {
         return [
             { title: 'Dashboard', href: route('dashboard.propietario'), icon: LayoutGrid },
             { title: 'Productos', href: route('propietario.productos.index'), icon: Package },
+            { title: 'Lotes', href: route('propietario.lotes.index'), icon: Barcode },
             { title: 'Inventario', href: route('propietario.inventario.index'), icon: Boxes },
             { title: 'Compras', href: route('propietario.compras.index'), icon: ShoppingCart },
             { title: 'Clientes', href: route('propietario.clientes.index'), icon: Users },

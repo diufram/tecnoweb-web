@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Button } from '@/components/ui/button';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { DateInput, Input } from '@/components/ui/input';
+import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AdminLayout from '@/layouts/admin/AdminLayout.vue';
 import type { BreadcrumbItem } from '@/types';
@@ -19,47 +19,42 @@ interface ProductoOption {
 interface Inventario {
     id: number;
     id_producto: number;
-    codigo_lote: string;
-    fecha_ingreso: string;
-    fecha_vencimiento: string;
+    id_lote: number;
     cantidad_disponible: number;
     costo_unitario_lote: string;
 }
 
-const props = defineProps<{ mode: 'create' | 'edit'; inventario: Inventario | null; productos: ProductoOption[] }>();
+interface LoteOption {
+    id: number;
+    codigo_lote: string;
+    fecha_ingreso: string;
+    fecha_vencimiento: string;
+}
+
+const props = defineProps<{ mode: 'create' | 'edit'; inventario: Inventario | null; productos: ProductoOption[]; lotes: LoteOption[] }>();
 const isEditing = computed(() => props.mode === 'edit');
 const title = computed(() => (isEditing.value ? 'Editar inventario' : 'Crear inventario'));
-const today = new Date().toISOString().slice(0, 10);
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Inventario', href: route('propietario.inventario.index') },
     { title: title.value, href: '#' },
 ];
 
 const schema = toTypedSchema(
-    z
-        .object({
-            id_producto: z.coerce.number().min(1, 'Selecciona un producto.'),
-            codigo_lote: z.string().trim().min(3, 'El codigo de lote debe tener al menos 3 caracteres.').max(255),
-            fecha_ingreso: z.string().min(1, 'La fecha de ingreso es obligatoria.'),
-            fecha_vencimiento: z.string().min(1, 'La fecha de vencimiento es obligatoria.'),
-            cantidad_disponible: z.coerce
-                .number()
-                .int('La cantidad debe ser un numero entero.')
-                .min(0, 'La cantidad no puede ser negativa.')
-                .max(1000000),
-            costo_unitario_lote: z.coerce.number().min(0, 'El costo unitario no puede ser negativo.').max(9999999999.99),
-        })
-        .refine((data) => data.fecha_vencimiento >= data.fecha_ingreso, {
-            path: ['fecha_vencimiento'],
-            message: 'La fecha de vencimiento debe ser posterior o igual a la fecha de ingreso.',
-        }),
+    z.object({
+        id_producto: z.coerce.number().min(1, 'Selecciona un producto.'),
+        id_lote: z.coerce.number().min(1, 'Selecciona un lote.'),
+        cantidad_disponible: z.coerce
+            .number()
+            .int('La cantidad debe ser un numero entero.')
+            .min(0, 'La cantidad no puede ser negativa.')
+            .max(1000000),
+        costo_unitario_lote: z.coerce.number().min(0, 'El costo unitario no puede ser negativo.').max(9999999999.99),
+    }),
 );
 
 const initialValues = {
     id_producto: String(props.inventario?.id_producto ?? 0),
-    codigo_lote: props.inventario?.codigo_lote ?? '',
-    fecha_ingreso: props.inventario?.fecha_ingreso ?? today,
-    fecha_vencimiento: props.inventario?.fecha_vencimiento ?? today,
+    id_lote: String(props.inventario?.id_lote ?? 0),
     cantidad_disponible: props.inventario?.cantidad_disponible ?? 0,
     costo_unitario_lote: Number(props.inventario?.costo_unitario_lote ?? 0),
 };
@@ -102,7 +97,7 @@ const submit = veeForm.handleSubmit((values) => {
                 <form class="grid gap-6" @submit="submit">
                     <div class="grid gap-4 md:grid-cols-2">
                         <FormField v-slot="{ componentField }" name="id_producto">
-                            <FormItem class="md:col-span-2">
+                            <FormItem>
                                 <FormLabel>Producto</FormLabel>
                                 <Select v-bind="componentField">
                                     <FormControl>
@@ -120,15 +115,32 @@ const submit = veeForm.handleSubmit((values) => {
                                 <FormMessage />
                             </FormItem>
                         </FormField>
-                        <FormField v-slot="{ componentField }" name="codigo_lote">
+
+                        <FormField v-slot="{ componentField }" name="id_lote">
                             <FormItem>
-                                <FormLabel>Codigo de lote</FormLabel>
-                                <FormControl>
-                                    <Input v-bind="componentField" />
-                                </FormControl>
+                                <div class="flex items-center justify-between gap-3">
+                                    <FormLabel>Lote</FormLabel>
+                                    <Link :href="route('propietario.lotes.create')" class="text-xs font-medium text-primary hover:underline">
+                                        Crear lote
+                                    </Link>
+                                </div>
+                                <Select v-bind="componentField">
+                                    <FormControl>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Selecciona lote" />
+                                        </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                        <SelectItem value="0" disabled>Selecciona lote</SelectItem>
+                                        <SelectItem v-for="lote in lotes" :key="lote.id" :value="String(lote.id)">
+                                            {{ lote.codigo_lote }} · Vence {{ new Date(lote.fecha_vencimiento).toLocaleDateString() }}
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
                                 <FormMessage />
                             </FormItem>
                         </FormField>
+
                         <FormField v-slot="{ componentField }" name="cantidad_disponible">
                             <FormItem>
                                 <FormLabel>Cantidad disponible</FormLabel>
@@ -138,24 +150,7 @@ const submit = veeForm.handleSubmit((values) => {
                                 <FormMessage />
                             </FormItem>
                         </FormField>
-                        <FormField v-slot="{ componentField }" name="fecha_ingreso">
-                            <FormItem>
-                                <FormLabel>Fecha de ingreso</FormLabel>
-                                <FormControl>
-                                    <DateInput v-bind="componentField" />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        </FormField>
-                        <FormField v-slot="{ componentField }" name="fecha_vencimiento">
-                            <FormItem>
-                                <FormLabel>Fecha de vencimiento</FormLabel>
-                                <FormControl>
-                                    <DateInput v-bind="componentField" />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        </FormField>
+
                         <FormField v-slot="{ componentField }" name="costo_unitario_lote">
                             <FormItem>
                                 <FormLabel>Costo unitario</FormLabel>

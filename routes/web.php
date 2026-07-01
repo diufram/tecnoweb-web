@@ -6,6 +6,7 @@ use App\Http\Controllers\PagoFacilCallbackController;
 use App\Http\Controllers\Propietario\ClienteController;
 use App\Http\Controllers\Propietario\CompraController;
 use App\Http\Controllers\Propietario\InventarioController;
+use App\Http\Controllers\Propietario\LoteController;
 use App\Http\Controllers\Propietario\ProductoController;
 use App\Http\Controllers\Propietario\ProveedorController;
 use App\Http\Controllers\Proveedor\CompraController as ProveedorCompraController;
@@ -201,6 +202,8 @@ Route::middleware(['auth', 'verified', 'actor:propietario'])
     ->group(function () {
         Route::resource('productos', ProductoController::class)
             ->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
+        Route::resource('lotes', LoteController::class)
+            ->only(['index', 'create', 'store', 'edit', 'update']);
         Route::resource('inventario', InventarioController::class)
             ->parameters(['inventario' => 'inventario'])
             ->only(['index', 'create', 'store', 'edit', 'update']);
