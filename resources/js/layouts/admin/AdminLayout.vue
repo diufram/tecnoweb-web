@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/sidebar';
 import type { BreadcrumbItemType } from '@/types';
 import { Link, usePage } from '@inertiajs/vue3';
-import { BarChart3, Boxes, FileText, Handshake, LayoutGrid, Palette, Package, ShoppingCart, Truck, UserRound, Users } from 'lucide-vue-next';
+import { BarChart3, Boxes, FileText, Handshake, LayoutGrid, Package, Palette, ShoppingCart, Truck, UserRound, Users } from 'lucide-vue-next';
 import { computed, type Component } from 'vue';
 
 type Actor = 'propietario' | 'proveedor';
@@ -36,9 +36,7 @@ const props = defineProps<{
 const page = usePage();
 
 const actorLabel = computed(() => (props.actor === 'propietario' ? 'Propietario' : 'Proveedor'));
-const dashboardHref = computed(() =>
-    props.actor === 'propietario' ? route('dashboard.propietario') : route('dashboard.proveedor'),
-);
+const dashboardHref = computed(() => (props.actor === 'propietario' ? route('dashboard.propietario') : route('dashboard.proveedor')));
 
 const navItems = computed<AdminNavItem[]>(() => {
     if (props.actor === 'propietario') {
@@ -57,10 +55,10 @@ const navItems = computed<AdminNavItem[]>(() => {
 
     return [
         { title: 'Dashboard', href: route('dashboard.proveedor'), icon: LayoutGrid },
-        { title: 'Solicitudes', href: '#solicitudes', icon: FileText },
-        { title: 'Contraofertas', href: '#contraofertas', icon: Handshake },
-        { title: 'Compras', href: '#compras', icon: ShoppingCart },
-        { title: 'Historial', href: '#historial', icon: BarChart3 },
+        { title: 'Solicitudes', href: route('proveedor.solicitudes'), icon: FileText },
+        { title: 'Contraofertas', href: route('proveedor.contraofertas'), icon: Handshake },
+        { title: 'Compras', href: route('proveedor.compras'), icon: ShoppingCart },
+        { title: 'Historial', href: route('proveedor.historial'), icon: BarChart3 },
         { title: 'Perfil', href: route('profile.edit'), icon: UserRound },
         { title: 'Apariencia', href: route('appearance'), icon: Palette },
     ];
@@ -80,9 +78,7 @@ const navItems = computed<AdminNavItem[]>(() => {
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                 </SidebarMenu>
-                <div class="px-2 pb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                    Panel {{ actorLabel }}
-                </div>
+                <div class="px-2 pb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">Panel {{ actorLabel }}</div>
             </SidebarHeader>
 
             <SidebarContent>

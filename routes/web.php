@@ -8,6 +8,7 @@ use App\Http\Controllers\Propietario\CompraController;
 use App\Http\Controllers\Propietario\InventarioController;
 use App\Http\Controllers\Propietario\ProductoController;
 use App\Http\Controllers\Propietario\ProveedorController;
+use App\Http\Controllers\Proveedor\CompraController as ProveedorCompraController;
 use App\Models\Cliente;
 use App\Models\Compra;
 use App\Models\Inventario;
@@ -222,3 +223,15 @@ Route::middleware(['auth', 'verified', 'actor:propietario'])
 
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
+
+Route::middleware(['auth', 'verified', 'actor:proveedor'])
+    ->prefix('proveedor')
+    ->name('proveedor.')
+    ->group(function () {
+        Route::get('solicitudes', [ProveedorCompraController::class, 'index'])->name('solicitudes');
+        Route::get('contraofertas', [ProveedorCompraController::class, 'index'])->name('contraofertas');
+        Route::get('compras', [ProveedorCompraController::class, 'index'])->name('compras');
+        Route::get('historial', [ProveedorCompraController::class, 'index'])->name('historial');
+        Route::get('compras/{compra}', [ProveedorCompraController::class, 'show'])->name('show');
+        Route::post('compras/{compra}/responder', [ProveedorCompraController::class, 'responder'])->name('responder');
+    });
