@@ -67,9 +67,9 @@ test('propietario can create a compra with calculated total', function () {
             'fecha_emision' => now()->toDateString(),
             'observaciones' => 'Compra de reposicion',
             'id_proveedor' => $proveedor->id_usuario,
-            'id_producto' => $producto->id,
-            'cantidad' => 10,
-            'precio_unitario' => 5.5,
+            'detalles' => [
+                ['id_producto' => $producto->id, 'cantidad' => 10, 'precio_unitario' => 5.5],
+            ],
         ])
         ->assertRedirect(route('propietario.compras.index'));
 
@@ -89,7 +89,7 @@ test('propietario can create a compra with calculated total', function () {
 test('compra validates required fields', function () {
     $this->actingAs(propietarioUserForStockManagement())
         ->post(route('propietario.compras.store'), [])
-        ->assertSessionHasErrors(['estado', 'fecha_emision', 'observaciones', 'id_proveedor', 'id_producto', 'cantidad', 'precio_unitario']);
+        ->assertSessionHasErrors(['estado', 'fecha_emision', 'observaciones', 'id_proveedor', 'detalles']);
 });
 
 test('propietario can update a compra and replace detail', function () {
@@ -120,9 +120,9 @@ test('propietario can update a compra and replace detail', function () {
             'fecha_emision' => now()->toDateString(),
             'observaciones' => 'Actualizada',
             'id_proveedor' => $proveedor->id_usuario,
-            'id_producto' => $otroProducto->id,
-            'cantidad' => 4,
-            'precio_unitario' => 7,
+            'detalles' => [
+                ['id_producto' => $otroProducto->id, 'cantidad' => 4, 'precio_unitario' => 7],
+            ],
         ])
         ->assertRedirect(route('propietario.compras.index'));
 
@@ -136,6 +136,71 @@ test('propietario can update a compra and replace detail', function () {
         'id_producto' => $otroProducto->id,
         'cantidad' => 4,
         'subtotal' => 28,
+    ]);
+});
+
+test('proveedor can counter offer multiple products and propietario can accept it', function () {
+    $owner = propietarioUserForStockManagement();
+    $proveedor = proveedorForStockManagement();
+    $producto = productoForStockManagement();
+    $otroProducto = productoForStockManagement(['nombre_comercial' => 'Producto Contra Test']);
+
+    $compra = Compra::create([
+        'estado' => 'SOLICITUD',
+        'fecha_emision' => now()->toDateString(),
+        'monto_total' => 40,
+        'observaciones' => 'Solicitud multiple',
+        'id_propietario' => $owner->propietario->id_usuario,
+        'id_proveedor' => $proveedor->id_usuario,
+    ]);
+    $detalleUno = DetalleCompra::create([
+        'id_compra' => $compra->id,
+        'id_producto' => $producto->id,
+        'cantidad' => 2,
+        'precio_unitario' => 10,
+        'subtotal' => 20,
+    ]);
+    $detalleDos = DetalleCompra::create([
+        'id_compra' => $compra->id,
+        'id_producto' => $otroProducto->id,
+        'cantidad' => 4,
+        'precio_unitario' => 5,
+        'subtotal' => 20,
+    ]);
+
+    $this->actingAs($proveedor->usuario)
+        ->post(route('proveedor.responder', $compra), [
+            'estado' => 'CONTRA_OFERTA',
+            'detalles' => [
+                ['id' => $detalleUno->id, 'cantidad' => 3, 'precio_unitario' => 9],
+                ['id' => $detalleDos->id, 'cantidad' => 4, 'precio_unitario' => 6],
+            ],
+        ])
+        ->assertRedirect(route('proveedor.historial'));
+
+    $this->assertDatabaseHas('compra', [
+        'id' => $compra->id,
+        'estado' => 'CONTRA_OFERTA',
+        'monto_total' => 51,
+    ]);
+    $this->assertDatabaseHas('detalle_compra', [
+        'id' => $detalleUno->id,
+        'cantidad' => 2,
+        'subtotal' => 20,
+        'cantidad_contraoferta' => 3,
+        'subtotal_contraoferta' => 27,
+    ]);
+
+    $this->actingAs($owner)
+        ->post(route('propietario.compras.resolver-contraoferta', $compra), [
+            'estado' => 'APROBADO',
+        ])
+        ->assertRedirect(route('propietario.compras.show', $compra));
+
+    $this->assertDatabaseHas('compra', [
+        'id' => $compra->id,
+        'estado' => 'APROBADO',
+        'monto_total' => 51,
     ]);
 });
 

@@ -1,22 +1,24 @@
 <script setup lang="ts">
 import { Button } from '@/components/ui/button';
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { DateInput, Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AdminLayout from '@/layouts/admin/AdminLayout.vue';
 import { textareaClass } from '@/lib/form-classes';
 import type { BreadcrumbItem } from '@/types';
-import { Head, Link, useForm as useInertiaForm } from '@inertiajs/vue3';
-import { toTypedSchema } from '@vee-validate/zod';
-import { ArrowLeft, Save } from 'lucide-vue-next';
-import { useForm as useVeeForm } from 'vee-validate';
+import { Head, Link, useForm } from '@inertiajs/vue3';
+import { ArrowLeft, Plus, Save, Trash2 } from 'lucide-vue-next';
 import { computed } from 'vue';
-import * as z from 'zod';
 
 interface Option {
     id: number;
     nombre_comercial?: string;
     empresa?: string;
+}
+
+interface CompraDetalleForm {
+    id_producto: string;
+    cantidad: number;
+    precio_unitario: number;
 }
 
 interface Compra {
@@ -25,9 +27,11 @@ interface Compra {
     fecha_emision: string;
     observaciones: string;
     id_proveedor: number;
-    id_producto: number;
-    cantidad: number;
-    precio_unitario: string;
+    detalles: Array<{
+        id_producto: number;
+        cantidad: number;
+        precio_unitario: string | number;
+    }>;
 }
 
 const props = defineProps<{
@@ -46,49 +50,54 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: title.value, href: '#' },
 ];
 
-const schema = toTypedSchema(
-    z.object({
-        estado: z.string().min(1, 'Selecciona un estado.'),
-        fecha_emision: z.string().min(1, 'La fecha de emision es obligatoria.'),
-        observaciones: z.string().trim().min(3, 'Las observaciones deben tener al menos 3 caracteres.').max(1000),
-        id_proveedor: z.coerce.number().min(1, 'Selecciona un proveedor.'),
-        id_producto: z.coerce.number().min(1, 'Selecciona un producto.'),
-        cantidad: z.coerce.number().int('La cantidad debe ser un numero entero.').min(1, 'La cantidad debe ser mayor a cero.').max(1000000),
-        precio_unitario: z.coerce.number().min(0.01, 'El precio unitario debe ser mayor a cero.').max(9999999999.99),
-    }),
-);
+const initialDetails = (): CompraDetalleForm[] => {
+    if (props.compra?.detalles?.length) {
+        return props.compra.detalles.map((detalle) => ({
+            id_producto: String(detalle.id_producto),
+            cantidad: detalle.cantidad,
+            precio_unitario: Number(detalle.precio_unitario),
+        }));
+    }
 
-const initialValues = {
+    return [{ id_producto: '0', cantidad: 1, precio_unitario: 0 }];
+};
+
+const form = useForm({
     estado: props.compra?.estado ?? 'SOLICITUD',
     fecha_emision: props.compra?.fecha_emision ?? today,
     observaciones: props.compra?.observaciones ?? '',
     id_proveedor: String(props.compra?.id_proveedor ?? 0),
-    id_producto: String(props.compra?.id_producto ?? 0),
-    cantidad: props.compra?.cantidad ?? 1,
-    precio_unitario: Number(props.compra?.precio_unitario ?? 0),
+    detalles: initialDetails(),
+});
+
+const totalSolicitado = computed(() =>
+    form.detalles.reduce((total, detalle) => total + Number(detalle.cantidad || 0) * Number(detalle.precio_unitario || 0), 0),
+);
+
+const addDetalle = () => {
+    form.detalles.push({ id_producto: '0', cantidad: 1, precio_unitario: 0 });
 };
 
-const veeForm = useVeeForm({ validationSchema: schema, initialValues });
-const form = useInertiaForm(initialValues);
-
-const submit = veeForm.handleSubmit((values) => {
-    form.clearErrors();
-    Object.assign(form, values);
-
-    if (isEditing.value && props.compra) {
-        form.patch(route('propietario.compras.update', props.compra.id), {
-            preserveScroll: true,
-            onError: (errors) => veeForm.setErrors(errors),
-        });
-
+const removeDetalle = (index: number) => {
+    if (form.detalles.length === 1) {
         return;
     }
 
-    form.post(route('propietario.compras.store'), {
-        preserveScroll: true,
-        onError: (errors) => veeForm.setErrors(errors),
-    });
-});
+    form.detalles.splice(index, 1);
+};
+
+const fieldError = (index: number, field: keyof CompraDetalleForm) => form.errors[`detalles.${index}.${field}` as keyof typeof form.errors];
+
+const submit = () => {
+    form.clearErrors();
+
+    if (isEditing.value && props.compra) {
+        form.patch(route('propietario.compras.update', props.compra.id), { preserveScroll: true });
+        return;
+    }
+
+    form.post(route('propietario.compras.store'), { preserveScroll: true });
+};
 </script>
 
 <template>
@@ -99,79 +108,81 @@ const submit = veeForm.handleSubmit((values) => {
                 <section class="space-y-2">
                     <p class="text-sm font-medium text-muted-foreground">Gestion de compras</p>
                     <h1 class="text-3xl font-semibold tracking-tight">{{ title }}</h1>
-                    <p class="max-w-2xl text-muted-foreground">El total se calcula automaticamente en el servidor.</p>
+                    <p class="max-w-2xl text-muted-foreground">Solicita uno o varios productos al proveedor. El total se calcula automaticamente.</p>
                 </section>
                 <Button as-child variant="outline">
                     <Link :href="route('propietario.compras.index')"><ArrowLeft class="size-4" /> Volver</Link>
                 </Button>
             </div>
 
-            <div class="max-w-4xl space-y-6">
+            <div class="max-w-5xl space-y-6">
                 <section class="space-y-1">
                     <h2 class="text-xl font-semibold tracking-tight">Datos de compra</h2>
-                    <p class="text-sm text-muted-foreground">Selecciona proveedor, producto y cantidad solicitada.</p>
+                    <p class="text-sm text-muted-foreground">Selecciona proveedor y agrega los productos de la solicitud.</p>
                 </section>
 
-                <form class="grid gap-6" @submit="submit">
+                <form class="grid gap-6" @submit.prevent="submit">
                     <div class="grid gap-4 md:grid-cols-2">
-                        <FormField v-slot="{ componentField }" name="estado">
-                            <FormItem>
-                                <FormLabel>Estado</FormLabel>
-                                <Select v-bind="componentField">
-                                    <FormControl>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Selecciona un estado" />
-                                        </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                        <SelectItem v-for="estado in estados" :key="estado" :value="estado">
-                                            {{ estado }}
-                                        </SelectItem>
-                                    </SelectContent>
-                                </Select>
-                                <FormMessage />
-                            </FormItem>
-                        </FormField>
+                        <label class="grid gap-2 text-sm font-medium">
+                            Estado
+                            <Select v-model="form.estado">
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Selecciona un estado" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem v-for="estado in estados" :key="estado" :value="estado">
+                                        {{ estado }}
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <span v-if="form.errors.estado" class="text-sm font-normal text-destructive">{{ form.errors.estado }}</span>
+                        </label>
 
-                        <FormField v-slot="{ componentField }" name="fecha_emision">
-                            <FormItem>
-                                <FormLabel>Fecha de emision</FormLabel>
-                                <FormControl>
-                                    <DateInput v-bind="componentField" />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        </FormField>
+                        <label class="grid gap-2 text-sm font-medium">
+                            Fecha de emision
+                            <DateInput v-model="form.fecha_emision" />
+                            <span v-if="form.errors.fecha_emision" class="text-sm font-normal text-destructive">{{ form.errors.fecha_emision }}</span>
+                        </label>
 
-                        <FormField v-slot="{ componentField }" name="id_proveedor">
-                            <FormItem>
-                                <FormLabel>Proveedor</FormLabel>
-                                <Select v-bind="componentField">
-                                    <FormControl>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Selecciona proveedor" />
-                                        </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                        <SelectItem value="0" disabled>Selecciona proveedor</SelectItem>
-                                        <SelectItem v-for="proveedor in proveedores" :key="proveedor.id" :value="String(proveedor.id)">
-                                            {{ proveedor.empresa }}
-                                        </SelectItem>
-                                    </SelectContent>
-                                </Select>
-                                <FormMessage />
-                            </FormItem>
-                        </FormField>
+                        <label class="grid gap-2 text-sm font-medium md:col-span-2">
+                            Proveedor
+                            <Select v-model="form.id_proveedor">
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Selecciona proveedor" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="0" disabled>Selecciona proveedor</SelectItem>
+                                    <SelectItem v-for="proveedor in proveedores" :key="proveedor.id" :value="String(proveedor.id)">
+                                        {{ proveedor.empresa }}
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
+                            <span v-if="form.errors.id_proveedor" class="text-sm font-normal text-destructive">{{ form.errors.id_proveedor }}</span>
+                        </label>
+                    </div>
 
-                        <FormField v-slot="{ componentField }" name="id_producto">
-                            <FormItem>
-                                <FormLabel>Producto</FormLabel>
-                                <Select v-bind="componentField">
-                                    <FormControl>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Selecciona producto" />
-                                        </SelectTrigger>
-                                    </FormControl>
+                    <section class="space-y-4">
+                        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                            <div>
+                                <h3 class="font-semibold">Productos solicitados</h3>
+                                <p class="text-sm text-muted-foreground">Puedes agregar varios productos en la misma solicitud.</p>
+                            </div>
+                            <Button type="button" variant="outline" class="rounded-full" @click="addDetalle">
+                                <Plus class="size-4" /> Agregar producto
+                            </Button>
+                        </div>
+
+                        <div
+                            v-for="(detalle, index) in form.detalles"
+                            :key="index"
+                            class="grid gap-4 rounded-2xl border bg-card p-4 md:grid-cols-[1fr_8rem_10rem_auto] md:items-start"
+                        >
+                            <label class="grid gap-2 text-sm font-medium">
+                                Producto
+                                <Select v-model="detalle.id_producto">
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Selecciona producto" />
+                                    </SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="0" disabled>Selecciona producto</SelectItem>
                                         <SelectItem v-for="producto in productos" :key="producto.id" :value="String(producto.id)">
@@ -179,49 +190,64 @@ const submit = veeForm.handleSubmit((values) => {
                                         </SelectItem>
                                     </SelectContent>
                                 </Select>
-                                <FormMessage />
-                            </FormItem>
-                        </FormField>
+                                <span v-if="fieldError(index, 'id_producto')" class="text-sm font-normal text-destructive">{{
+                                    fieldError(index, 'id_producto')
+                                }}</span>
+                            </label>
 
-                        <FormField v-slot="{ componentField }" name="cantidad">
-                            <FormItem>
-                                <FormLabel>Cantidad</FormLabel>
-                                <FormControl>
-                                    <Input v-bind="componentField" min="1" type="number" />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        </FormField>
+                            <label class="grid gap-2 text-sm font-medium">
+                                Cantidad
+                                <Input v-model.number="detalle.cantidad" min="1" type="number" />
+                                <span v-if="fieldError(index, 'cantidad')" class="text-sm font-normal text-destructive">{{
+                                    fieldError(index, 'cantidad')
+                                }}</span>
+                            </label>
 
-                        <FormField v-slot="{ componentField }" name="precio_unitario">
-                            <FormItem>
-                                <FormLabel>Precio unitario</FormLabel>
-                                <FormControl>
-                                    <Input v-bind="componentField" min="0.01" step="0.01" type="number" />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        </FormField>
+                            <label class="grid gap-2 text-sm font-medium">
+                                Precio unitario
+                                <Input v-model.number="detalle.precio_unitario" min="0.01" step="0.01" type="number" />
+                                <span v-if="fieldError(index, 'precio_unitario')" class="text-sm font-normal text-destructive">{{
+                                    fieldError(index, 'precio_unitario')
+                                }}</span>
+                            </label>
 
-                        <FormField v-slot="{ componentField }" name="observaciones">
-                            <FormItem class="md:col-span-2">
-                                <FormLabel>Observaciones</FormLabel>
-                                <FormControl>
-                                    <textarea v-bind="componentField" :class="textareaClass" placeholder="Detalle de la solicitud" />
-                                </FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        </FormField>
-                    </div>
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                class="mt-7"
+                                :disabled="form.detalles.length === 1"
+                                @click="removeDetalle(index)"
+                            >
+                                <Trash2 class="size-4 text-destructive" />
+                            </Button>
+                        </div>
 
-                    <div class="flex items-center gap-3">
-                        <Button :disabled="form.processing">
-                            <Save class="size-4" />
-                            {{ isEditing ? 'Guardar cambios' : 'Crear compra' }}
-                        </Button>
-                        <Button as-child variant="ghost" type="button">
-                            <Link :href="route('propietario.compras.index')">Cancelar</Link>
-                        </Button>
+                        <p v-if="form.errors.detalles" class="text-sm font-medium text-destructive">{{ form.errors.detalles }}</p>
+                    </section>
+
+                    <label class="grid gap-2 text-sm font-medium">
+                        Observaciones
+                        <textarea v-model="form.observaciones" :class="textareaClass" placeholder="Detalle de la solicitud" />
+                        <span v-if="form.errors.observaciones" class="text-sm font-normal text-destructive">{{ form.errors.observaciones }}</span>
+                    </label>
+
+                    <div class="flex flex-col gap-4 rounded-2xl border bg-muted/40 p-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div>
+                            <p class="text-sm text-muted-foreground">Total solicitado</p>
+                            <p class="text-2xl font-semibold tabular-nums">
+                                {{ new Intl.NumberFormat('es-BO', { style: 'currency', currency: 'BOB' }).format(totalSolicitado) }}
+                            </p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <Button :disabled="form.processing">
+                                <Save class="size-4" />
+                                {{ isEditing ? 'Guardar cambios' : 'Crear compra' }}
+                            </Button>
+                            <Button as-child variant="ghost" type="button">
+                                <Link :href="route('propietario.compras.index')">Cancelar</Link>
+                            </Button>
+                        </div>
                     </div>
                 </form>
             </div>

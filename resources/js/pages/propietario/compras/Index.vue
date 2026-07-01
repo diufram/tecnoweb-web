@@ -10,13 +10,15 @@ import { useFormatters } from '@/composables/useFormatters';
 import AdminLayout from '@/layouts/admin/AdminLayout.vue';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/vue3';
-import { Pencil, Plus, ShoppingCart } from 'lucide-vue-next';
+import { Eye, Pencil, Plus, ShoppingCart } from 'lucide-vue-next';
 
 interface Compra {
     id: number;
     estado: string;
     fecha_emision: string;
     monto_total: string;
+    total_solicitado: string | number;
+    total_contraoferta: string | number | null;
     observaciones: string;
     proveedor: { empresa: string; usuario: { nombre: string } };
     detalles: { cantidad: number; precio_unitario: string; subtotal: string; producto: { nombre_comercial: string } }[];
@@ -53,7 +55,7 @@ const { money, date } = useFormatters();
                             <TableHead class="min-h-12 px-4 py-3 text-muted-foreground">Estado</TableHead>
                             <TableHead class="min-h-12 px-4 py-3 text-muted-foreground">Proveedor</TableHead>
                             <TableHead class="min-h-12 px-4 py-3 text-muted-foreground">Producto</TableHead>
-                            <TableHead class="min-h-12 px-4 py-3 text-right text-muted-foreground">Cantidad</TableHead>
+                            <TableHead class="min-h-12 px-4 py-3 text-right text-muted-foreground">Items</TableHead>
                             <TableHead class="min-h-12 px-4 py-3 text-right text-muted-foreground">Total</TableHead>
                             <TableHead class="min-h-12 px-4 py-3 text-right text-muted-foreground">Acciones</TableHead>
                         </TableRow>
@@ -73,12 +75,20 @@ const { money, date } = useFormatters();
                             </TableCell>
                             <TableCell class="p-3">
                                 <p class="truncate">{{ compra.detalles[0]?.producto.nombre_comercial }}</p>
+                                <p v-if="compra.detalles.length > 1" class="text-xs font-medium text-muted-foreground">
+                                    + {{ compra.detalles.length - 1 }} productos mas
+                                </p>
                                 <p class="truncate text-xs text-muted-foreground">{{ compra.observaciones }}</p>
                             </TableCell>
-                            <TableCell class="p-3 text-right tabular-nums">{{ compra.detalles[0]?.cantidad ?? 0 }}</TableCell>
+                            <TableCell class="p-3 text-right tabular-nums">{{ compra.detalles.length }}</TableCell>
                             <TableCell class="p-3 text-right font-semibold tabular-nums">{{ money(compra.monto_total) }}</TableCell>
                             <TableCell class="p-3">
-                                <div class="flex justify-end">
+                                <div class="flex justify-end gap-1">
+                                    <Button as-child variant="ghost" size="icon" aria-label="Ver compra">
+                                        <Link :href="route('propietario.compras.show', compra.id)">
+                                            <Eye class="size-4" />
+                                        </Link>
+                                    </Button>
                                     <Button as-child variant="ghost" size="icon" aria-label="Editar compra">
                                         <Link :href="route('propietario.compras.edit', compra.id)">
                                             <Pencil class="size-4" />

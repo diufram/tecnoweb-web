@@ -16,6 +16,9 @@ class DetalleCompra extends Model
         'cantidad',
         'precio_unitario',
         'subtotal',
+        'cantidad_contraoferta',
+        'precio_unitario_contraoferta',
+        'subtotal_contraoferta',
         'id_compra',
         'id_producto',
     ];
@@ -26,6 +29,9 @@ class DetalleCompra extends Model
             'cantidad' => 'integer',
             'precio_unitario' => 'decimal:2',
             'subtotal' => 'decimal:2',
+            'cantidad_contraoferta' => 'integer',
+            'precio_unitario_contraoferta' => 'decimal:2',
+            'subtotal_contraoferta' => 'decimal:2',
         ];
     }
 

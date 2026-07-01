@@ -208,7 +208,9 @@ Route::middleware(['auth', 'verified', 'actor:propietario'])
             ->parameters(['inventario' => 'inventario'])
             ->only(['index', 'create', 'store', 'edit', 'update']);
         Route::resource('compras', CompraController::class)
-            ->only(['index', 'create', 'store', 'edit', 'update']);
+            ->only(['index', 'create', 'store', 'show', 'edit', 'update']);
+        Route::post('compras/{compra}/resolver-contraoferta', [CompraController::class, 'resolverContraoferta'])
+            ->name('compras.resolver-contraoferta');
         Route::resource('clientes', ClienteController::class)
             ->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
         Route::resource('proveedores', ProveedorController::class)

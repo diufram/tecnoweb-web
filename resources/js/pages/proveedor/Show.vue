@@ -4,6 +4,7 @@ import StatusBadge from '@/components/shared/StatusBadge.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useFormatters } from '@/composables/useFormatters';
 import AdminLayout from '@/layouts/admin/AdminLayout.vue';
 import type { BreadcrumbItem } from '@/types';
@@ -16,10 +17,11 @@ interface CompraDetalle {
     cantidad: number;
     precio_unitario: string | number;
     subtotal: string | number;
-    producto: {
-        id: number;
-        nombre_comercial: string;
-    };
+    cantidad_contraoferta: number | null;
+    precio_unitario_contraoferta: string | number | null;
+    subtotal_contraoferta: string | number | null;
+    diferencia_subtotal: string | number | null;
+    producto: { id: number; nombre_comercial: string };
 }
 
 interface Compra {
@@ -29,11 +31,8 @@ interface Compra {
     monto_total: string | number;
     observaciones: string;
     id_proveedor: number;
-    propietario: {
-        nombre: string | null;
-        email: string | null;
-    };
-    detalle: CompraDetalle | null;
+    propietario: { nombre: string | null; email: string | null };
+    detalles: CompraDetalle[];
 }
 
 const props = defineProps<{
@@ -42,17 +41,18 @@ const props = defineProps<{
 }>();
 
 const { money, date } = useFormatters();
-
 const form = useForm<{
     estado: 'APROBADO' | 'RECHAZADO' | 'CONTRA_OFERTA';
     observaciones: string;
-    cantidad: number;
-    precio_unitario: number;
+    detalles: Array<{ id: number; cantidad: number; precio_unitario: number }>;
 }>({
     estado: 'APROBADO',
     observaciones: '',
-    cantidad: props.compra.detalle?.cantidad ?? 1,
-    precio_unitario: Number(props.compra.detalle?.precio_unitario ?? 0),
+    detalles: props.compra.detalles.map((detalle) => ({
+        id: detalle.id,
+        cantidad: detalle.cantidad_contraoferta ?? detalle.cantidad,
+        precio_unitario: Number(detalle.precio_unitario_contraoferta ?? detalle.precio_unitario),
+    })),
 });
 
 const modo = computed<'aprobar' | 'rechazar' | 'contraofertar'>(() => {
@@ -61,12 +61,20 @@ const modo = computed<'aprobar' | 'rechazar' | 'contraofertar'>(() => {
     return 'contraofertar';
 });
 
-const subtotalPropuesto = computed(() => Math.round(form.cantidad * Number(form.precio_unitario || 0) * 100) / 100);
+const totalSolicitado = computed(() => props.compra.detalles.reduce((total, detalle) => total + Number(detalle.subtotal), 0));
+const totalPropuesto = computed(() =>
+    form.detalles.reduce((total, detalle) => total + Number(detalle.cantidad || 0) * Number(detalle.precio_unitario || 0), 0),
+);
+const diferenciaTotal = computed(() => totalPropuesto.value - totalSolicitado.value);
+
+const detalleForm = (id: number) => form.detalles.find((detalle) => detalle.id === id)!;
+const subtotalPropuesto = (id: number) => {
+    const detalle = detalleForm(id);
+    return Number(detalle.cantidad || 0) * Number(detalle.precio_unitario || 0);
+};
 
 const submit = () => {
-    form.post(route('proveedor.responder', props.compra.id), {
-        preserveScroll: true,
-    });
+    form.post(route('proveedor.responder', props.compra.id), { preserveScroll: true });
 };
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -109,8 +117,8 @@ const breadcrumbs: BreadcrumbItem[] = [
                                 <p class="text-lg font-semibold">{{ date(compra.fecha_emision) }}</p>
                             </div>
                             <div class="rounded-2xl border bg-muted/50 p-4">
-                                <p class="text-sm text-muted-foreground">Total propuesto</p>
-                                <p class="text-lg font-semibold">{{ money(compra.monto_total) }}</p>
+                                <p class="text-sm text-muted-foreground">Total solicitado</p>
+                                <p class="text-lg font-semibold">{{ money(totalSolicitado) }}</p>
                             </div>
                             <div class="rounded-2xl border bg-muted/50 p-4">
                                 <p class="text-sm text-muted-foreground">Contacto</p>
@@ -119,23 +127,41 @@ const breadcrumbs: BreadcrumbItem[] = [
                         </CardContent>
                     </Card>
 
-                    <Card v-if="compra.detalle">
+                    <Card>
                         <CardHeader>
-                            <CardTitle class="text-lg">Producto solicitado</CardTitle>
-                            <CardDescription>{{ compra.detalle.producto.nombre_comercial }}</CardDescription>
+                            <CardTitle class="text-lg">Productos solicitados</CardTitle>
+                            <CardDescription>Al contraofertar puedes proponer cantidad y precio por cada producto.</CardDescription>
                         </CardHeader>
-                        <CardContent class="grid gap-4 sm:grid-cols-3">
-                            <div class="rounded-2xl border bg-background/50 p-4">
-                                <p class="text-sm text-muted-foreground">Cantidad</p>
-                                <p class="text-lg font-semibold">{{ compra.detalle.cantidad }}</p>
-                            </div>
-                            <div class="rounded-2xl border bg-background/50 p-4">
-                                <p class="text-sm text-muted-foreground">Precio unitario</p>
-                                <p class="text-lg font-semibold">{{ money(compra.detalle.precio_unitario) }}</p>
-                            </div>
-                            <div class="rounded-2xl border bg-background/50 p-4">
-                                <p class="text-sm text-muted-foreground">Subtotal</p>
-                                <p class="text-lg font-semibold">{{ money(compra.detalle.subtotal) }}</p>
+                        <CardContent>
+                            <div class="overflow-hidden rounded-2xl border">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow class="grid grid-cols-[1fr_7rem_9rem_9rem_7rem_9rem] items-center gap-3 bg-muted hover:bg-muted">
+                                            <TableHead class="px-4 py-3 text-muted-foreground">Producto</TableHead>
+                                            <TableHead class="px-4 py-3 text-right text-muted-foreground">Cant. sol.</TableHead>
+                                            <TableHead class="px-4 py-3 text-right text-muted-foreground">Precio sol.</TableHead>
+                                            <TableHead class="px-4 py-3 text-right text-muted-foreground">Subtotal sol.</TableHead>
+                                            <TableHead class="px-4 py-3 text-right text-muted-foreground">Cant. prop.</TableHead>
+                                            <TableHead class="px-4 py-3 text-right text-muted-foreground">Subtotal prop.</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        <TableRow
+                                            v-for="detalle in compra.detalles"
+                                            :key="detalle.id"
+                                            class="grid grid-cols-[1fr_7rem_9rem_9rem_7rem_9rem] items-center gap-3 px-4 transition hover:bg-muted/40"
+                                        >
+                                            <TableCell class="p-3 font-medium">{{ detalle.producto.nombre_comercial }}</TableCell>
+                                            <TableCell class="p-3 text-right tabular-nums">{{ detalle.cantidad }}</TableCell>
+                                            <TableCell class="p-3 text-right tabular-nums">{{ money(detalle.precio_unitario) }}</TableCell>
+                                            <TableCell class="p-3 text-right font-semibold tabular-nums">{{ money(detalle.subtotal) }}</TableCell>
+                                            <TableCell class="p-3 text-right tabular-nums">{{ detalle.cantidad_contraoferta ?? '-' }}</TableCell>
+                                            <TableCell class="p-3 text-right font-semibold tabular-nums">
+                                                {{ detalle.subtotal_contraoferta ? money(detalle.subtotal_contraoferta) : '-' }}
+                                            </TableCell>
+                                        </TableRow>
+                                    </TableBody>
+                                </Table>
                             </div>
                         </CardContent>
                     </Card>
@@ -169,8 +195,7 @@ const breadcrumbs: BreadcrumbItem[] = [
                                         class="w-full"
                                         @click="form.estado = 'APROBADO'"
                                     >
-                                        <CheckCircle2 class="size-4" />
-                                        Aprobar
+                                        <CheckCircle2 class="size-4" /> Aprobar
                                     </Button>
                                     <Button
                                         type="button"
@@ -178,8 +203,7 @@ const breadcrumbs: BreadcrumbItem[] = [
                                         class="w-full"
                                         @click="form.estado = 'CONTRA_OFERTA'"
                                     >
-                                        <Handshake class="size-4" />
-                                        Contraofertar
+                                        <Handshake class="size-4" /> Contraofertar
                                     </Button>
                                     <Button
                                         type="button"
@@ -187,29 +211,36 @@ const breadcrumbs: BreadcrumbItem[] = [
                                         class="w-full"
                                         @click="form.estado = 'RECHAZADO'"
                                     >
-                                        <XCircle class="size-4" />
-                                        Rechazar
+                                        <XCircle class="size-4" /> Rechazar
                                     </Button>
                                 </div>
                                 <p v-if="form.errors.estado" class="text-sm text-destructive">{{ form.errors.estado }}</p>
                             </div>
 
-                            <div v-if="modo === 'contraofertar'" class="grid gap-4 sm:grid-cols-2">
-                                <label class="grid gap-2 text-sm font-medium">
-                                    Cantidad propuesta
-                                    <Input v-model.number="form.cantidad" min="1" type="number" />
-                                    <span v-if="form.errors.cantidad" class="text-sm font-normal text-destructive">{{ form.errors.cantidad }}</span>
-                                </label>
-                                <label class="grid gap-2 text-sm font-medium">
-                                    Precio unitario propuesto
-                                    <Input v-model.number="form.precio_unitario" min="0.01" step="0.01" type="number" />
-                                    <span v-if="form.errors.precio_unitario" class="text-sm font-normal text-destructive">{{
-                                        form.errors.precio_unitario
-                                    }}</span>
-                                </label>
-                                <div class="rounded-2xl border bg-muted/50 p-4 sm:col-span-2">
-                                    <p class="text-sm text-muted-foreground">Subtotal propuesto</p>
-                                    <p class="text-2xl font-semibold">{{ money(subtotalPropuesto) }}</p>
+                            <div v-if="modo === 'contraofertar'" class="space-y-4">
+                                <div v-for="detalle in compra.detalles" :key="detalle.id" class="rounded-2xl border bg-muted/30 p-4">
+                                    <p class="mb-3 font-medium">{{ detalle.producto.nombre_comercial }}</p>
+                                    <div class="grid gap-3 sm:grid-cols-2">
+                                        <label class="grid gap-2 text-sm font-medium">
+                                            Cantidad propuesta
+                                            <Input v-model.number="detalleForm(detalle.id).cantidad" min="1" type="number" />
+                                        </label>
+                                        <label class="grid gap-2 text-sm font-medium">
+                                            Precio propuesto
+                                            <Input v-model.number="detalleForm(detalle.id).precio_unitario" min="0.01" step="0.01" type="number" />
+                                        </label>
+                                    </div>
+                                    <p class="mt-3 text-sm text-muted-foreground">
+                                        Subtotal propuesto: <strong>{{ money(subtotalPropuesto(detalle.id)) }}</strong>
+                                    </p>
+                                </div>
+
+                                <div class="rounded-2xl border bg-muted/50 p-4">
+                                    <p class="text-sm text-muted-foreground">Total propuesto</p>
+                                    <p class="text-2xl font-semibold">{{ money(totalPropuesto) }}</p>
+                                    <p :class="['text-sm font-medium', diferenciaTotal > 0 ? 'text-destructive' : 'text-emerald-500']">
+                                        Diferencia vs solicitud: {{ money(diferenciaTotal) }}
+                                    </p>
                                 </div>
                             </div>
 

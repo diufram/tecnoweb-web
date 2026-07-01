@@ -46,7 +46,6 @@ class CompraController extends Controller
             'detalles.producto:id,nombre_comercial',
             'propietario.usuario:id,nombre,email',
         ]);
-        $detalle = $compra->detalles->first();
 
         return Inertia::render('proveedor/Show', [
             'compra' => [
@@ -60,16 +59,22 @@ class CompraController extends Controller
                     'nombre' => $compra->propietario?->usuario?->nombre,
                     'email' => $compra->propietario?->usuario?->email,
                 ],
-                'detalle' => $detalle ? [
+                'detalles' => $compra->detalles->map(fn (DetalleCompra $detalle) => [
                     'id' => $detalle->id,
                     'cantidad' => $detalle->cantidad,
                     'precio_unitario' => $detalle->precio_unitario,
                     'subtotal' => $detalle->subtotal,
+                    'cantidad_contraoferta' => $detalle->cantidad_contraoferta,
+                    'precio_unitario_contraoferta' => $detalle->precio_unitario_contraoferta,
+                    'subtotal_contraoferta' => $detalle->subtotal_contraoferta,
+                    'diferencia_subtotal' => $detalle->subtotal_contraoferta !== null
+                        ? round((float) $detalle->subtotal_contraoferta - (float) $detalle->subtotal, 2)
+                        : null,
                     'producto' => [
                         'id' => $detalle->producto->id,
                         'nombre_comercial' => $detalle->producto->nombre_comercial,
                     ],
-                ] : null,
+                ])->values(),
             ],
             'puede_contraofertar' => in_array($compra->estado, ['SOLICITUD', 'CONTRA_OFERTA'], true),
         ]);
@@ -88,52 +93,57 @@ class CompraController extends Controller
         $validated = $request->validate([
             'estado' => ['required', Rule::in(self::ESTADOS_RESPUESTA)],
             'observaciones' => ['required_if:estado,RECHAZADO', 'nullable', 'string', 'min:3', 'max:1000'],
-            'cantidad' => ['required_if:estado,CONTRA_OFERTA', 'nullable', 'integer', 'min:1', 'max:1000000'],
-            'precio_unitario' => ['required_if:estado,CONTRA_OFERTA', 'nullable', 'numeric', 'min:0.01', 'max:9999999999.99'],
+            'detalles' => ['required_if:estado,CONTRA_OFERTA', 'array', 'min:1'],
+            'detalles.*.id' => ['required_if:estado,CONTRA_OFERTA', 'integer', Rule::exists('detalle_compra', 'id')->whereNull('deleted_at')],
+            'detalles.*.cantidad' => ['required_if:estado,CONTRA_OFERTA', 'integer', 'min:1', 'max:1000000'],
+            'detalles.*.precio_unitario' => ['required_if:estado,CONTRA_OFERTA', 'numeric', 'min:0.01', 'max:9999999999.99'],
         ], [
             'estado.required' => 'Selecciona una respuesta.',
             'estado.in' => 'La respuesta seleccionada no es valida.',
             'observaciones.required_if' => 'Indica el motivo del rechazo.',
             'observaciones.min' => 'Las observaciones deben tener al menos 3 caracteres.',
-            'cantidad.required_if' => 'Ingresa la cantidad propuesta.',
-            'cantidad.integer' => 'La cantidad debe ser un numero entero.',
-            'cantidad.min' => 'La cantidad debe ser mayor a cero.',
-            'precio_unitario.required_if' => 'Ingresa el precio unitario propuesto.',
-            'precio_unitario.numeric' => 'El precio unitario debe ser numerico.',
-            'precio_unitario.min' => 'El precio unitario debe ser mayor a cero.',
+            'detalles.required_if' => 'Ingresa una contraoferta por producto.',
+            'detalles.*.id.required_if' => 'La contraoferta tiene un producto invalido.',
+            'detalles.*.id.exists' => 'La contraoferta tiene un producto invalido.',
+            'detalles.*.cantidad.required_if' => 'Ingresa la cantidad propuesta.',
+            'detalles.*.cantidad.integer' => 'La cantidad debe ser un numero entero.',
+            'detalles.*.cantidad.min' => 'La cantidad debe ser mayor a cero.',
+            'detalles.*.precio_unitario.required_if' => 'Ingresa el precio unitario propuesto.',
+            'detalles.*.precio_unitario.numeric' => 'El precio unitario debe ser numerico.',
+            'detalles.*.precio_unitario.min' => 'El precio unitario debe ser mayor a cero.',
         ]);
 
         DB::transaction(function () use ($compra, $validated) {
             $estado = $validated['estado'];
 
             if ($estado === 'CONTRA_OFERTA') {
-                $cantidad = (int) $validated['cantidad'];
-                $precioUnitario = round((float) $validated['precio_unitario'], 2);
-                $subtotal = round($cantidad * $precioUnitario, 2);
+                $detalles = $compra->detalles()->get()->keyBy('id');
+                $montoTotal = 0;
 
-                $detalleAnterior = DetalleCompra::withTrashed()
-                    ->where('id_compra', $compra->id)
-                    ->orderByDesc('id')
-                    ->first();
+                foreach ($validated['detalles'] as $detallePropuesto) {
+                    $detalle = $detalles->get((int) $detallePropuesto['id']);
 
-                if (! $detalleAnterior) {
-                    throw ValidationException::withMessages([
-                        'compra' => 'La compra no tiene un detalle editable.',
+                    if (! $detalle) {
+                        throw ValidationException::withMessages([
+                            'compra' => 'La contraoferta contiene un producto que no pertenece a esta compra.',
+                        ]);
+                    }
+
+                    $cantidad = (int) $detallePropuesto['cantidad'];
+                    $precioUnitario = round((float) $detallePropuesto['precio_unitario'], 2);
+                    $subtotal = round($cantidad * $precioUnitario, 2);
+                    $montoTotal += $subtotal;
+
+                    $detalle->update([
+                        'cantidad_contraoferta' => $cantidad,
+                        'precio_unitario_contraoferta' => $precioUnitario,
+                        'subtotal_contraoferta' => $subtotal,
                     ]);
                 }
 
                 $compra->update([
                     'estado' => 'CONTRA_OFERTA',
-                    'monto_total' => $subtotal,
-                ]);
-
-                $compra->detalles()->delete();
-                DetalleCompra::create([
-                    'id_compra' => $compra->id,
-                    'id_producto' => $detalleAnterior->id_producto,
-                    'cantidad' => $cantidad,
-                    'precio_unitario' => $precioUnitario,
-                    'subtotal' => $subtotal,
+                    'monto_total' => $montoTotal,
                 ]);
 
                 return;
@@ -191,6 +201,9 @@ class CompraController extends Controller
                 'cantidad' => $detalle->cantidad,
                 'precio_unitario' => $detalle->precio_unitario,
                 'subtotal' => $detalle->subtotal,
+                'cantidad_contraoferta' => $detalle->cantidad_contraoferta,
+                'precio_unitario_contraoferta' => $detalle->precio_unitario_contraoferta,
+                'subtotal_contraoferta' => $detalle->subtotal_contraoferta,
                 'producto' => [
                     'id' => $detalle->producto->id,
                     'nombre_comercial' => $detalle->producto->nombre_comercial,

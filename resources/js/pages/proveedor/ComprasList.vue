@@ -67,8 +67,11 @@ const detalleResumen = (compra: Compra) => compra.detalles[0];
 
                     <TableCell class="p-3">
                         <p class="truncate font-medium">{{ detalleResumen(compra)?.producto.nombre_comercial }}</p>
+                        <p v-if="compra.detalles.length > 1" class="truncate text-xs font-medium text-muted-foreground">
+                            + {{ compra.detalles.length - 1 }} productos mas
+                        </p>
                         <p class="truncate text-xs text-muted-foreground">
-                            Cant. {{ detalleResumen(compra)?.cantidad }} · {{ money(detalleResumen(compra)?.precio_unitario ?? 0) }} c/u
+                            {{ compra.detalles.length }} item(s) · Total {{ money(compra.monto_total) }}
                         </p>
                     </TableCell>
 
