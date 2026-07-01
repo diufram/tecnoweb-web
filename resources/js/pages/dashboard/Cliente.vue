@@ -34,6 +34,7 @@ const money = (value: string | number) =>
                     </p>
                     <div class="flex flex-wrap gap-2 pt-2">
                         <Button as-child><Link :href="route('cliente.catalogo')">Ver catálogo</Link></Button>
+                        <Button as-child variant="outline"><Link :href="route('cliente.carrito')">Carrito</Link></Button>
                         <Button as-child variant="outline"><Link :href="route('cliente.compras')">Mis compras</Link></Button>
                         <Button as-child variant="outline"><Link :href="route('cliente.pagos')">Pagos</Link></Button>
                     </div>

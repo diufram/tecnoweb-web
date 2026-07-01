@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Cliente\CarritoController;
 use App\Http\Controllers\Propietario\ClienteController;
 use App\Http\Controllers\Propietario\CompraController;
 use App\Http\Controllers\Propietario\InventarioController;
@@ -132,6 +133,12 @@ Route::middleware(['auth', 'verified', 'actor:cliente'])
                 'compras' => $compras,
             ]);
         })->name('compras');
+
+        Route::get('carrito', [CarritoController::class, 'index'])->name('carrito');
+        Route::post('carrito', [CarritoController::class, 'store'])->name('carrito.store');
+        Route::patch('carrito/{inventario}', [CarritoController::class, 'update'])->name('carrito.update');
+        Route::delete('carrito/{inventario}', [CarritoController::class, 'destroy'])->name('carrito.destroy');
+        Route::post('carrito/checkout', [CarritoController::class, 'checkout'])->name('carrito.checkout');
 
         Route::get('pagos', function () {
             $clienteId = request()->user()->cliente?->id_usuario;

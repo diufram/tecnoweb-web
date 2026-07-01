@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import CustomerLayout from '@/layouts/customer/CustomerLayout.vue';
-import { Head } from '@inertiajs/vue3';
-import { PackageSearch, ShoppingBasket } from 'lucide-vue-next';
+import { Head, Link, useForm } from '@inertiajs/vue3';
+import { Loader2, PackageSearch, ShoppingBasket, ShoppingCart } from 'lucide-vue-next';
+import { ref } from 'vue';
 
 interface CatalogoItem {
     id: number;
@@ -24,6 +26,15 @@ defineProps<{
     catalogo: CatalogoItem[];
 }>();
 
+const quantities = ref<Record<number, number>>({});
+const targetId = ref<number | null>(null);
+const toastMessage = ref('');
+let toastTimeout: number | undefined;
+const form = useForm({
+    id_inventario: null as number | null,
+    cantidad: 1,
+});
+
 const money = (value: string | number) =>
     new Intl.NumberFormat('es-BO', {
         style: 'currency',
@@ -31,6 +42,37 @@ const money = (value: string | number) =>
     }).format(Number(value));
 
 const date = (value: string) => new Date(value).toLocaleDateString('es-BO');
+
+const quantityFor = (item: CatalogoItem) => quantities.value[item.id] ?? 1;
+
+const showToast = (message: string) => {
+    toastMessage.value = message;
+
+    if (toastTimeout) {
+        window.clearTimeout(toastTimeout);
+    }
+
+    toastTimeout = window.setTimeout(() => {
+        toastMessage.value = '';
+    }, 3000);
+};
+
+const addToCart = (item: CatalogoItem) => {
+    targetId.value = item.id;
+    form.clearErrors();
+    form.id_inventario = item.id;
+    form.cantidad = quantityFor(item);
+    form.post(route('cliente.carrito.store'), {
+        preserveScroll: true,
+        onSuccess: () => {
+            quantities.value[item.id] = 1;
+            showToast(`${item.producto.nombre_comercial} agregado al carrito.`);
+        },
+        onFinish: () => {
+            targetId.value = null;
+        },
+    });
+};
 </script>
 
 <template>
@@ -42,9 +84,14 @@ const date = (value: string) => new Date(value).toLocaleDateString('es-BO');
                 <div class="space-y-2">
                     <p class="text-sm font-medium text-primary">Catálogo</p>
                     <h1 class="text-3xl font-semibold tracking-tight">Medicamentos disponibles</h1>
-                    <p class="max-w-2xl text-muted-foreground">Consulta los productos con stock disponible y precio referencial por lote.</p>
+                    <p class="max-w-2xl text-muted-foreground">Agrega productos al carrito y finaliza la compra eligiendo contado o cuotas.</p>
                 </div>
-                <PackageSearch class="size-12 text-muted-foreground" />
+                <Button as-child>
+                    <Link :href="route('cliente.carrito')">
+                        <ShoppingCart class="size-4" />
+                        Ver carrito
+                    </Link>
+                </Button>
             </div>
         </section>
 
@@ -66,10 +113,18 @@ const date = (value: string) => new Date(value).toLocaleDateString('es-BO');
                         </div>
                     </div>
 
-                    <Button class="w-full" disabled>
-                        <ShoppingBasket class="size-4" />
-                        Compra pendiente de implementar
-                    </Button>
+                    <div class="space-y-3">
+                        <label class="grid gap-2 text-sm font-medium">
+                            Cantidad
+                            <Input v-model.number="quantities[item.id]" type="number" min="1" :max="item.cantidad_disponible" placeholder="1" />
+                        </label>
+                        <p v-if="targetId === item.id && form.errors.cantidad" class="text-sm text-destructive">{{ form.errors.cantidad }}</p>
+                        <Button class="w-full" :disabled="form.processing && targetId === item.id" @click="addToCart(item)">
+                            <Loader2 v-if="form.processing && targetId === item.id" class="size-4 animate-spin" />
+                            <ShoppingBasket v-else class="size-4" />
+                            {{ form.processing && targetId === item.id ? 'Agregando...' : 'Agregar al carrito' }}
+                        </Button>
+                    </div>
                 </CardContent>
             </Card>
         </section>
@@ -81,5 +136,19 @@ const date = (value: string) => new Date(value).toLocaleDateString('es-BO');
                 <p class="text-sm text-muted-foreground">Cuando exista inventario con stock, aparecerá aquí.</p>
             </div>
         </div>
+
+        <Transition
+            enter-active-class="transition duration-200 ease-out"
+            enter-from-class="-translate-y-2 opacity-0"
+            enter-to-class="translate-y-0 opacity-100"
+            leave-active-class="transition duration-150 ease-in"
+            leave-from-class="translate-y-0 opacity-100"
+            leave-to-class="-translate-y-2 opacity-0"
+        >
+            <div v-if="toastMessage" class="fixed right-6 top-6 z-50 max-w-sm rounded-xl border bg-background p-4 text-sm font-medium shadow-lg">
+                <p>{{ toastMessage }}</p>
+                <Link :href="route('cliente.carrito')" class="mt-1 inline-block text-primary underline-offset-4 hover:underline">Ver carrito</Link>
+            </div>
+        </Transition>
     </CustomerLayout>
 </template>
