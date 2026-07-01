@@ -1,14 +1,17 @@
 <?php
 
-use App\Http\Controllers\Propietario\ProductoController;
 use App\Http\Controllers\Propietario\ClienteController;
 use App\Http\Controllers\Propietario\CompraController;
 use App\Http\Controllers\Propietario\InventarioController;
+use App\Http\Controllers\Propietario\ProductoController;
 use App\Http\Controllers\Propietario\ProveedorController;
 use App\Models\Cliente;
 use App\Models\Compra;
+use App\Models\Inventario;
+use App\Models\PlanPago;
 use App\Models\Producto;
 use App\Models\Proveedor;
+use App\Models\Venta;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -62,6 +65,115 @@ Route::get('dashboard/cliente', function () {
         ],
     ]);
 })->middleware(['auth', 'verified', 'actor:cliente'])->name('dashboard.cliente');
+
+Route::middleware(['auth', 'verified', 'actor:cliente'])
+    ->prefix('cliente')
+    ->name('cliente.')
+    ->group(function () {
+        Route::get('catalogo', function () {
+            $catalogo = Inventario::query()
+                ->with(['producto', 'lote'])
+                ->where('cantidad_disponible', '>', 0)
+                ->orderByDesc('cantidad_disponible')
+                ->get()
+                ->map(fn (Inventario $inventario) => [
+                    'id' => $inventario->id,
+                    'cantidad_disponible' => $inventario->cantidad_disponible,
+                    'precio_referencial' => $inventario->costo_unitario_lote,
+                    'producto' => [
+                        'id' => $inventario->producto->id,
+                        'nombre_comercial' => $inventario->producto->nombre_comercial,
+                        'stock_actual' => $inventario->producto->stock_actual,
+                    ],
+                    'lote' => [
+                        'id' => $inventario->lote->id,
+                        'fecha_vencimiento' => $inventario->lote->fecha_vencimiento,
+                    ],
+                ]);
+
+            return Inertia::render('cliente/Catalogo', [
+                'catalogo' => $catalogo,
+            ]);
+        })->name('catalogo');
+
+        Route::get('compras', function () {
+            $clienteId = request()->user()->cliente?->id_usuario;
+            abort_unless($clienteId, 403);
+
+            $compras = Venta::query()
+                ->with(['detalles.inventario.producto', 'planPago.cuotas'])
+                ->where('id_cliente', $clienteId)
+                ->orderByDesc('fecha')
+                ->get()
+                ->map(fn (Venta $venta) => [
+                    'id' => $venta->id,
+                    'estado_venta' => $venta->estado_venta,
+                    'fecha' => $venta->fecha,
+                    'total' => $venta->total,
+                    'detalles' => $venta->detalles->map(fn ($detalle) => [
+                        'id' => $detalle->id,
+                        'cantidad' => $detalle->cantidad,
+                        'precio_unitario' => $detalle->precio_unitario,
+                        'subtotal' => $detalle->subtotal,
+                        'producto' => [
+                            'nombre_comercial' => $detalle->inventario->producto->nombre_comercial,
+                        ],
+                    ]),
+                    'plan_pago' => $venta->planPago ? [
+                        'estado_plan' => $venta->planPago->estado_plan,
+                        'tipo_pago' => $venta->planPago->tipo_pago,
+                        'cuotas_pendientes' => $venta->planPago->cuotas
+                            ->reject(fn ($cuota) => in_array(strtoupper($cuota->estado_cuota), ['PAGADA', 'PAGADO'], true))
+                            ->count(),
+                    ] : null,
+                ]);
+
+            return Inertia::render('cliente/MisCompras', [
+                'compras' => $compras,
+            ]);
+        })->name('compras');
+
+        Route::get('pagos', function () {
+            $clienteId = request()->user()->cliente?->id_usuario;
+            abort_unless($clienteId, 403);
+
+            $planes = PlanPago::query()
+                ->with(['venta', 'cuotas' => fn ($query) => $query->orderBy('nro_cuota')])
+                ->whereHas('venta', fn ($query) => $query->where('id_cliente', $clienteId))
+                ->orderByDesc('created_at')
+                ->get()
+                ->map(function (PlanPago $plan) {
+                    $cuotasPagadas = $plan->cuotas->filter(fn ($cuota) => in_array(strtoupper($cuota->estado_cuota), ['PAGADA', 'PAGADO'], true));
+                    $cuotasPendientes = $plan->cuotas->reject(fn ($cuota) => in_array(strtoupper($cuota->estado_cuota), ['PAGADA', 'PAGADO'], true));
+
+                    return [
+                        'id' => $plan->id,
+                        'estado_plan' => $plan->estado_plan,
+                        'tipo_pago' => $plan->tipo_pago,
+                        'venta' => [
+                            'id' => $plan->venta->id,
+                            'fecha' => $plan->venta->fecha,
+                            'total' => $plan->venta->total,
+                        ],
+                        'total_pagado' => $cuotasPagadas->sum('monto'),
+                        'total_pendiente' => $cuotasPendientes->sum('monto'),
+                        'proxima_cuota' => $cuotasPendientes->first()?->only(['nro_cuota', 'fecha_vencimiento', 'monto', 'estado_cuota']),
+                        'cuotas' => $plan->cuotas->map(fn ($cuota) => [
+                            'id' => $cuota->id,
+                            'nro_cuota' => $cuota->nro_cuota,
+                            'fecha_vencimiento' => $cuota->fecha_vencimiento,
+                            'monto' => $cuota->monto,
+                            'estado_cuota' => $cuota->estado_cuota,
+                            'id_transaccion_pago_facil' => $cuota->id_transaccion_pago_facil,
+                        ]),
+                    ];
+                });
+
+            return Inertia::render('cliente/Pagos', [
+                'planes' => $planes,
+            ]);
+        })->name('pagos');
+    });
 
 Route::middleware(['auth', 'verified', 'actor:propietario'])
     ->prefix('propietario')

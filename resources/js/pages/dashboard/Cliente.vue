@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import CustomerLayout from '@/layouts/customer/CustomerLayout.vue';
-import { Head } from '@inertiajs/vue3';
+import { Head, Link } from '@inertiajs/vue3';
 import { CreditCard, PackageSearch, ReceiptText } from 'lucide-vue-next';
 
 defineProps<{
@@ -28,7 +29,14 @@ const money = (value: string | number) =>
                 <div class="space-y-4">
                     <p class="text-sm font-medium text-primary">Portal cliente</p>
                     <h1 class="text-3xl font-semibold tracking-tight md:text-5xl">Compra medicamentos y controla tus pagos</h1>
-                    <p class="max-w-2xl text-muted-foreground">Explora el catálogo, revisa tu línea de crédito y mantén al día tus cuotas desde un panel pensado para clientes.</p>
+                    <p class="max-w-2xl text-muted-foreground">
+                        Explora el catálogo, revisa tu línea de crédito y mantén al día tus cuotas desde un panel pensado para clientes.
+                    </p>
+                    <div class="flex flex-wrap gap-2 pt-2">
+                        <Button as-child><Link :href="route('cliente.catalogo')">Ver catálogo</Link></Button>
+                        <Button as-child variant="outline"><Link :href="route('cliente.compras')">Mis compras</Link></Button>
+                        <Button as-child variant="outline"><Link :href="route('cliente.pagos')">Pagos</Link></Button>
+                    </div>
                 </div>
 
                 <Card class="bg-primary text-primary-foreground">
@@ -71,7 +79,9 @@ const money = (value: string | number) =>
                 </CardHeader>
                 <CardContent>
                     <div class="text-2xl font-bold">Disponible</div>
-                    <p class="text-xs text-muted-foreground">Listo para conectar productos</p>
+                    <Button as-child variant="link" class="h-auto px-0">
+                        <Link :href="route('cliente.catalogo')">Explorar productos</Link>
+                    </Button>
                 </CardContent>
             </Card>
         </section>
