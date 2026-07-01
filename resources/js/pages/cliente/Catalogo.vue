@@ -1,7 +1,10 @@
 <script setup lang="ts">
+import EmptyState from '@/components/shared/EmptyState.vue';
+import PageHeader from '@/components/shared/PageHeader.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { useFormatters } from '@/composables/useFormatters';
 import CustomerLayout from '@/layouts/customer/CustomerLayout.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { Loader2, PackageSearch, ShoppingBasket, ShoppingCart } from 'lucide-vue-next';
@@ -35,13 +38,7 @@ const form = useForm({
     cantidad: 1,
 });
 
-const money = (value: string | number) =>
-    new Intl.NumberFormat('es-BO', {
-        style: 'currency',
-        currency: 'BOB',
-    }).format(Number(value));
-
-const date = (value: string) => new Date(value).toLocaleDateString('es-BO');
+const { money, date } = useFormatters();
 
 const quantityFor = (item: CatalogoItem) => quantities.value[item.id] ?? 1;
 
@@ -79,21 +76,21 @@ const addToCart = (item: CatalogoItem) => {
     <Head title="Catálogo" />
 
     <CustomerLayout>
-        <section class="rounded-3xl border bg-card p-6 shadow-sm md:p-8">
-            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div class="space-y-2">
-                    <p class="text-sm font-medium text-primary">Catálogo</p>
-                    <h1 class="text-3xl font-semibold tracking-tight">Medicamentos disponibles</h1>
-                    <p class="max-w-2xl text-muted-foreground">Agrega productos al carrito y finaliza la compra eligiendo contado o cuotas.</p>
-                </div>
-                <Button as-child>
+        <PageHeader
+            eyebrow="Catálogo"
+            title="Medicamentos disponibles"
+            description="Agrega productos al carrito y finaliza la compra eligiendo contado o cuotas."
+            :icon="PackageSearch"
+        >
+            <div class="flex justify-end">
+                <Button as-child class="rounded-full">
                     <Link :href="route('cliente.carrito')">
                         <ShoppingCart class="size-4" />
                         Ver carrito
                     </Link>
                 </Button>
             </div>
-        </section>
+        </PageHeader>
 
         <section v-if="catalogo.length" class="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             <Card v-for="item in catalogo" :key="item.id" class="overflow-hidden">
@@ -119,7 +116,7 @@ const addToCart = (item: CatalogoItem) => {
                             <Input v-model.number="quantities[item.id]" type="number" min="1" :max="item.cantidad_disponible" placeholder="1" />
                         </label>
                         <p v-if="targetId === item.id && form.errors.cantidad" class="text-sm text-destructive">{{ form.errors.cantidad }}</p>
-                        <Button class="w-full" :disabled="form.processing && targetId === item.id" @click="addToCart(item)">
+                        <Button class="w-full rounded-full" :disabled="form.processing && targetId === item.id" @click="addToCart(item)">
                             <Loader2 v-if="form.processing && targetId === item.id" class="size-4 animate-spin" />
                             <ShoppingBasket v-else class="size-4" />
                             {{ form.processing && targetId === item.id ? 'Agregando...' : 'Agregar al carrito' }}
@@ -129,13 +126,12 @@ const addToCart = (item: CatalogoItem) => {
             </Card>
         </section>
 
-        <div v-else class="flex min-h-64 flex-col items-center justify-center gap-3 rounded-3xl border border-dashed text-center">
-            <PackageSearch class="size-12 text-muted-foreground" />
-            <div>
-                <p class="font-medium">No hay productos disponibles</p>
-                <p class="text-sm text-muted-foreground">Cuando exista inventario con stock, aparecerá aquí.</p>
-            </div>
-        </div>
+        <EmptyState
+            v-else
+            :icon="PackageSearch"
+            title="No hay productos disponibles"
+            description="Cuando exista inventario con stock, aparecerá aquí."
+        />
 
         <Transition
             enter-active-class="transition duration-200 ease-out"

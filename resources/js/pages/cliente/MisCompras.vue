@@ -1,8 +1,12 @@
 <script setup lang="ts">
+import EmptyState from '@/components/shared/EmptyState.vue';
+import PageHeader from '@/components/shared/PageHeader.vue';
+import StatusBadge from '@/components/shared/StatusBadge.vue';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useFormatters } from '@/composables/useFormatters';
 import CustomerLayout from '@/layouts/customer/CustomerLayout.vue';
 import { Head } from '@inertiajs/vue3';
-import { ReceiptText, ShoppingCart } from 'lucide-vue-next';
+import { ShoppingCart } from 'lucide-vue-next';
 
 interface CompraDetalle {
     id: number;
@@ -31,36 +35,27 @@ defineProps<{
     compras: Compra[];
 }>();
 
-const money = (value: string | number) =>
-    new Intl.NumberFormat('es-BO', {
-        style: 'currency',
-        currency: 'BOB',
-    }).format(Number(value));
-
-const date = (value: string) => new Date(value).toLocaleDateString('es-BO');
+const { money, date } = useFormatters();
 </script>
 
 <template>
     <Head title="Mis compras" />
 
     <CustomerLayout>
-        <section class="rounded-3xl border bg-card p-6 shadow-sm md:p-8">
-            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div class="space-y-2">
-                    <p class="text-sm font-medium text-primary">Mis compras</p>
-                    <h1 class="text-3xl font-semibold tracking-tight">Historial de compras</h1>
-                    <p class="max-w-2xl text-muted-foreground">Revisa tus ventas registradas, sus productos y el estado del plan de pago asociado.</p>
-                </div>
-                <ShoppingCart class="size-12 text-muted-foreground" />
-            </div>
-        </section>
+        <PageHeader
+            eyebrow="Mis compras"
+            title="Historial de compras"
+            description="Revisa tus ventas registradas, sus productos y el estado del plan de pago asociado."
+            :icon="ShoppingCart"
+        />
 
         <section v-if="compras.length" class="space-y-4">
             <Card v-for="compra in compras" :key="compra.id">
                 <CardHeader class="gap-3 sm:flex-row sm:items-start sm:justify-between">
-                    <div>
+                    <div class="space-y-2">
                         <CardTitle>Compra #{{ compra.id }}</CardTitle>
                         <CardDescription>{{ date(compra.fecha) }} · {{ compra.estado_venta }}</CardDescription>
+                        <StatusBadge :estado="compra.estado_venta" />
                     </div>
                     <div class="text-left sm:text-right">
                         <p class="text-sm text-muted-foreground">Total</p>
@@ -91,12 +86,11 @@ const date = (value: string) => new Date(value).toLocaleDateString('es-BO');
             </Card>
         </section>
 
-        <div v-else class="flex min-h-64 flex-col items-center justify-center gap-3 rounded-3xl border border-dashed text-center">
-            <ReceiptText class="size-12 text-muted-foreground" />
-            <div>
-                <p class="font-medium">Todavía no tienes compras</p>
-                <p class="text-sm text-muted-foreground">Cuando se registre una venta para tu cuenta, aparecerá aquí.</p>
-            </div>
-        </div>
+        <EmptyState
+            v-else
+            :icon="ShoppingCart"
+            title="Todavía no tienes compras"
+            description="Cuando se registre una venta para tu cuenta, aparecerá aquí."
+        />
     </CustomerLayout>
 </template>

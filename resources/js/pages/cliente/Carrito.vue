@@ -1,7 +1,10 @@
 <script setup lang="ts">
+import EmptyState from '@/components/shared/EmptyState.vue';
+import PageHeader from '@/components/shared/PageHeader.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { useFormatters } from '@/composables/useFormatters';
 import CustomerLayout from '@/layouts/customer/CustomerLayout.vue';
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import { CreditCard, Loader2, PackageSearch, ShoppingCart, Trash2 } from 'lucide-vue-next';
@@ -33,6 +36,8 @@ const props = defineProps<{
     };
 }>();
 
+const { money, date } = useFormatters();
+
 const quantities = reactive<Record<number, number>>(Object.fromEntries(props.items.map((item) => [item.id, item.cantidad])));
 
 const checkoutForm = useForm({
@@ -40,13 +45,6 @@ const checkoutForm = useForm({
     cuotas: 3,
 });
 
-const money = (value: string | number) =>
-    new Intl.NumberFormat('es-BO', {
-        style: 'currency',
-        currency: 'BOB',
-    }).format(Number(value));
-
-const date = (value: string) => new Date(value).toLocaleDateString('es-BO');
 const totalNumber = computed(() => Number(props.total));
 const creditoDisponible = computed(() => Number(props.credito.disponible));
 const creditoInsuficiente = computed(() => checkoutForm.tipo_pago === 'CREDITO' && totalNumber.value > creditoDisponible.value);
@@ -70,18 +68,12 @@ const checkout = () => {
     <Head title="Carrito" />
 
     <CustomerLayout>
-        <section class="rounded-3xl border bg-card p-6 shadow-sm md:p-8">
-            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div class="space-y-2">
-                    <p class="text-sm font-medium text-primary">Carrito</p>
-                    <h1 class="text-3xl font-semibold tracking-tight">Finaliza tu compra</h1>
-                    <p class="max-w-2xl text-muted-foreground">
-                        Agrega varios productos, ajusta cantidades y elige si pagarás al contado o en cuotas.
-                    </p>
-                </div>
-                <ShoppingCart class="size-12 text-muted-foreground" />
-            </div>
-        </section>
+        <PageHeader
+            eyebrow="Carrito"
+            title="Finaliza tu compra"
+            description="Agrega varios productos, ajusta cantidades y elige si pagarás al contado o en cuotas."
+            :icon="ShoppingCart"
+        />
 
         <div v-if="items.length" class="grid gap-6 lg:grid-cols-[1fr_24rem]">
             <section class="space-y-4">
@@ -112,7 +104,7 @@ const checkout = () => {
                             </label>
                         </div>
                         <div class="flex gap-2 sm:justify-end">
-                            <Button type="button" variant="outline" @click="updateItem(item)">Actualizar</Button>
+                            <Button type="button" variant="outline" class="rounded-full" @click="updateItem(item)">Actualizar</Button>
                             <Button type="button" variant="ghost" size="icon" aria-label="Quitar producto" @click="removeItem(item)">
                                 <Trash2 class="size-4 text-destructive" />
                             </Button>
@@ -120,7 +112,7 @@ const checkout = () => {
                     </CardContent>
                 </Card>
 
-                <Button as-child variant="outline">
+                <Button as-child variant="outline" class="rounded-full">
                     <Link :href="route('cliente.catalogo')">
                         <PackageSearch class="size-4" />
                         Seguir comprando
@@ -182,7 +174,7 @@ const checkout = () => {
                         <p v-if="checkoutForm.errors.carrito" class="text-sm font-medium text-destructive">{{ checkoutForm.errors.carrito }}</p>
                         <p v-if="checkoutForm.errors.pago" class="text-sm font-medium text-destructive">{{ checkoutForm.errors.pago }}</p>
 
-                        <Button class="w-full" type="submit" :disabled="checkoutForm.processing || creditoInsuficiente">
+                        <Button class="w-full rounded-full" type="submit" :disabled="checkoutForm.processing || creditoInsuficiente">
                             <Loader2 v-if="checkoutForm.processing" class="size-4 animate-spin" />
                             <CreditCard v-else class="size-4" />
                             {{ checkoutForm.processing ? 'Registrando...' : 'Confirmar compra' }}
@@ -192,15 +184,15 @@ const checkout = () => {
             </Card>
         </div>
 
-        <div v-else class="flex min-h-64 flex-col items-center justify-center gap-3 rounded-3xl border border-dashed text-center">
-            <ShoppingCart class="size-12 text-muted-foreground" />
-            <div>
-                <p class="font-medium">Tu carrito está vacío</p>
-                <p class="text-sm text-muted-foreground">Agrega productos desde el catálogo para iniciar una compra.</p>
-            </div>
-            <Button as-child variant="outline">
+        <EmptyState
+            v-else
+            :icon="ShoppingCart"
+            title="Tu carrito está vacío"
+            description="Agrega productos desde el catálogo para iniciar una compra."
+        >
+            <Button as-child variant="outline" class="rounded-full">
                 <Link :href="route('cliente.catalogo')">Ver catálogo</Link>
             </Button>
-        </div>
+        </EmptyState>
     </CustomerLayout>
 </template>

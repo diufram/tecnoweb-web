@@ -1,7 +1,12 @@
 <script setup lang="ts">
+import DataTable from '@/components/shared/DataTable.vue';
+import EmptyState from '@/components/shared/EmptyState.vue';
+import PageHeader from '@/components/shared/PageHeader.vue';
+import PageToolbar from '@/components/shared/PageToolbar.vue';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { useFormatters } from '@/composables/useFormatters';
 import AdminLayout from '@/layouts/admin/AdminLayout.vue';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/vue3';
@@ -62,11 +67,7 @@ const confirmDelete = () => {
     });
 };
 
-const money = (value: string | number) =>
-    new Intl.NumberFormat('es-BO', {
-        style: 'currency',
-        currency: 'BOB',
-    }).format(Number(value));
+const { money } = useFormatters();
 </script>
 
 <template>
@@ -74,32 +75,23 @@ const money = (value: string | number) =>
 
     <AdminLayout actor="propietario" :breadcrumbs="breadcrumbs">
         <div class="flex flex-1 flex-col gap-6 p-4 md:p-6">
-            <section class="overflow-hidden rounded-3xl border bg-gradient-to-br from-card via-card to-primary/10 p-6 shadow-sm md:p-8">
-                <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div class="space-y-2">
-                        <p class="text-sm font-semibold uppercase tracking-wide text-primary">Gestion</p>
-                        <h1 class="text-3xl font-semibold tracking-tight md:text-4xl">Clientes</h1>
-                        <p class="max-w-2xl text-muted-foreground">Administra las cuentas cliente, sus datos de facturacion y linea de credito.</p>
-                    </div>
-                    <div class="flex size-16 items-center justify-center rounded-2xl border bg-background/70 shadow-sm">
-                        <Users class="size-8 text-primary" />
-                    </div>
-                </div>
-            </section>
+            <PageHeader
+                eyebrow="Gestion"
+                title="Clientes"
+                description="Administra las cuentas cliente, sus datos de facturacion y linea de credito."
+                :icon="Users"
+            />
 
-            <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <p class="text-sm text-muted-foreground">
-                    Total registrados: <span class="font-medium text-foreground">{{ clientes.length }}</span>
-                </p>
+            <PageToolbar :total="clientes.length">
                 <Button as-child class="rounded-full">
                     <Link :href="route('propietario.clientes.create')">
                         <Plus class="size-4" />
                         Nuevo cliente
                     </Link>
                 </Button>
-            </div>
+            </PageToolbar>
 
-            <div v-if="clientes.length" class="overflow-hidden rounded-2xl border">
+            <DataTable v-if="clientes.length">
                 <Table>
                     <TableHeader>
                         <TableRow class="grid grid-cols-[1.3fr_1fr_8rem_8rem_8rem] items-center gap-4 rounded-t-2xl bg-muted hover:bg-muted">
@@ -156,20 +148,13 @@ const money = (value: string | number) =>
                         </TableRow>
                     </TableBody>
                 </Table>
-            </div>
+            </DataTable>
 
-            <div v-else class="flex min-h-56 flex-col items-center justify-center gap-3 rounded-3xl border border-dashed bg-card/40 text-center">
-                <div class="flex size-16 items-center justify-center rounded-2xl border bg-background/70">
-                    <Users class="size-8 text-muted-foreground" />
-                </div>
-                <div>
-                    <p class="font-medium">No hay clientes registrados</p>
-                    <p class="text-sm text-muted-foreground">Crea el primer cliente para comenzar.</p>
-                </div>
+            <EmptyState v-else :icon="Users" title="No hay clientes registrados" description="Crea el primer cliente para comenzar.">
                 <Button as-child variant="outline" class="rounded-full">
                     <Link :href="route('propietario.clientes.create')">Crear cliente</Link>
                 </Button>
-            </div>
+            </EmptyState>
         </div>
 
         <Dialog :open="target !== null" @update:open="(v) => (v ? null : closeDialog())">

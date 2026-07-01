@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { Button } from '@/components/ui/button';
+import EmptyState from '@/components/shared/EmptyState.vue';
+import PageHeader from '@/components/shared/PageHeader.vue';
+import StatGrid from '@/components/shared/StatGrid.vue';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import AdminLayout from '@/layouts/admin/AdminLayout.vue';
 import type { BreadcrumbItem } from '@/types';
-import { Head, Link } from '@inertiajs/vue3';
+import { Head } from '@inertiajs/vue3';
 import { Boxes, LayoutGrid, Package, ShoppingCart, Truck, Users } from 'lucide-vue-next';
 import { computed, type Component } from 'vue';
 
@@ -23,7 +25,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-interface StatCard {
+interface StatItem {
     title: string;
     value: number;
     description: string;
@@ -31,7 +33,7 @@ interface StatCard {
     href: string;
 }
 
-const statCards = computed<StatCard[]>(() => [
+const statCards = computed<StatItem[]>(() => [
     { title: 'Productos', value: 0, description: 'Productos registrados', icon: Package, href: route('propietario.productos.index') },
     { title: 'Inventario', value: 0, description: 'Registros de inventario', icon: Boxes, href: route('propietario.inventario.index') },
     { title: 'Compras', value: 0, description: 'Solicitudes a proveedores', icon: ShoppingCart, href: route('propietario.compras.index') },
@@ -45,50 +47,14 @@ const statCards = computed<StatCard[]>(() => [
 
     <AdminLayout actor="propietario" :breadcrumbs="breadcrumbs">
         <div class="flex flex-1 flex-col gap-6 p-4 md:p-6">
-            <section class="overflow-hidden rounded-3xl border bg-gradient-to-br from-card via-card to-primary/10 p-6 shadow-sm md:p-8">
-                <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div class="space-y-2">
-                        <p class="text-sm font-semibold uppercase tracking-wide text-primary">Panel administrativo</p>
-                        <h1 class="text-3xl font-semibold tracking-tight md:text-4xl">Resumen general</h1>
-                        <p class="max-w-2xl text-muted-foreground">
-                            Gestiona productos, inventario, compras, clientes y proveedores desde un solo lugar.
-                        </p>
-                    </div>
-                    <div class="flex size-16 items-center justify-center rounded-2xl border bg-background/70 shadow-sm">
-                        <LayoutGrid class="size-8 text-primary" />
-                    </div>
-                </div>
-            </section>
+            <PageHeader
+                eyebrow="Panel administrativo"
+                title="Resumen general"
+                description="Gestiona productos, inventario, compras, clientes y proveedores desde un solo lugar."
+                :icon="LayoutGrid"
+            />
 
-            <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                <Card
-                    v-for="(stat, index) in statCards"
-                    :key="stat.title"
-                    class="border-muted/80 bg-card/95 shadow-sm transition hover:border-primary/40"
-                >
-                    <CardHeader class="gap-3 pb-2">
-                        <div class="flex items-start justify-between gap-3">
-                            <div class="space-y-1">
-                                <CardTitle class="text-sm font-medium text-muted-foreground">{{ stat.title }}</CardTitle>
-                                <p class="text-3xl font-semibold tracking-tight">
-                                    {{
-                                        index === 0 ? stats.productos : index === 1 ? stats.clientes : index === 2 ? stats.proveedores : stats.compras
-                                    }}
-                                </p>
-                            </div>
-                            <div class="flex size-12 items-center justify-center rounded-2xl border bg-primary/10 text-primary">
-                                <component :is="stat.icon" class="size-5" />
-                            </div>
-                        </div>
-                    </CardHeader>
-                    <CardContent>
-                        <Button as-child variant="link" class="h-auto px-0">
-                            <Link :href="stat.href">Ir al modulo</Link>
-                        </Button>
-                        <CardDescription>{{ stat.description }}</CardDescription>
-                    </CardContent>
-                </Card>
-            </section>
+            <StatGrid :stats="statCards" />
 
             <Card class="border-muted/80 bg-card/95 shadow-sm">
                 <CardHeader>
@@ -98,6 +64,13 @@ const statCards = computed<StatCard[]>(() => [
                     </div>
                     <CardDescription>Este espacio queda listo para tablas de inventario, alertas de stock y compras recientes.</CardDescription>
                 </CardHeader>
+                <CardContent>
+                    <EmptyState
+                        :icon="ShoppingCart"
+                        title="Sin pendientes por ahora"
+                        description="Las solicitudes de compra, contraofertas y alertas apareceran aqui."
+                    />
+                </CardContent>
             </Card>
         </div>
     </AdminLayout>

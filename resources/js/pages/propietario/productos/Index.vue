@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import DataTable from '@/components/shared/DataTable.vue';
+import EmptyState from '@/components/shared/EmptyState.vue';
+import PageHeader from '@/components/shared/PageHeader.vue';
+import PageToolbar from '@/components/shared/PageToolbar.vue';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -58,32 +62,23 @@ const confirmDelete = () => {
 
     <AdminLayout actor="propietario" :breadcrumbs="breadcrumbs">
         <div class="flex flex-1 flex-col gap-6 p-4 md:p-6">
-            <section class="overflow-hidden rounded-3xl border bg-gradient-to-br from-card via-card to-primary/10 p-6 shadow-sm md:p-8">
-                <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div class="space-y-2">
-                        <p class="text-sm font-semibold uppercase tracking-wide text-primary">Gestion</p>
-                        <h1 class="text-3xl font-semibold tracking-tight md:text-4xl">Productos</h1>
-                        <p class="max-w-2xl text-muted-foreground">Lista, crea y actualiza los productos disponibles para inventario y compras.</p>
-                    </div>
-                    <div class="flex size-16 items-center justify-center rounded-2xl border bg-background/70 shadow-sm">
-                        <Package class="size-8 text-primary" />
-                    </div>
-                </div>
-            </section>
+            <PageHeader
+                eyebrow="Gestion"
+                title="Productos"
+                description="Lista, crea y actualiza los productos disponibles para inventario y compras."
+                :icon="Package"
+            />
 
-            <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <p class="text-sm text-muted-foreground">
-                    Total registrados: <span class="font-medium text-foreground">{{ productos.length }}</span>
-                </p>
+            <PageToolbar :total="productos.length">
                 <Button as-child class="rounded-full">
                     <Link :href="route('propietario.productos.create')">
                         <Plus class="size-4" />
                         Nuevo producto
                     </Link>
                 </Button>
-            </div>
+            </PageToolbar>
 
-            <div v-if="productos.length" class="overflow-hidden rounded-2xl border">
+            <DataTable v-if="productos.length">
                 <Table>
                     <TableHeader>
                         <TableRow class="grid grid-cols-[1fr_8rem_8rem] items-center gap-4 rounded-t-2xl bg-muted hover:bg-muted">
@@ -125,20 +120,13 @@ const confirmDelete = () => {
                         </TableRow>
                     </TableBody>
                 </Table>
-            </div>
+            </DataTable>
 
-            <div v-else class="flex min-h-56 flex-col items-center justify-center gap-3 rounded-3xl border border-dashed bg-card/40 text-center">
-                <div class="flex size-16 items-center justify-center rounded-2xl border bg-background/70">
-                    <Package class="size-8 text-muted-foreground" />
-                </div>
-                <div>
-                    <p class="font-medium">No hay productos registrados</p>
-                    <p class="text-sm text-muted-foreground">Crea el primer producto para comenzar.</p>
-                </div>
+            <EmptyState v-else :icon="Package" title="No hay productos registrados" description="Crea el primer producto para comenzar.">
                 <Button as-child variant="outline" class="rounded-full">
                     <Link :href="route('propietario.productos.create')">Crear producto</Link>
                 </Button>
-            </div>
+            </EmptyState>
         </div>
 
         <Dialog :open="target !== null" @update:open="(v) => (v ? null : closeDialog())">

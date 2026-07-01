@@ -1,6 +1,10 @@
 <script setup lang="ts">
+import EmptyState from '@/components/shared/EmptyState.vue';
+import PageHeader from '@/components/shared/PageHeader.vue';
+import StatusBadge from '@/components/shared/StatusBadge.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useFormatters } from '@/composables/useFormatters';
 import CustomerLayout from '@/layouts/customer/CustomerLayout.vue';
 import { Head, router, usePage } from '@inertiajs/vue3';
 import { CreditCard, Loader2, QrCode, WalletCards } from 'lucide-vue-next';
@@ -44,6 +48,8 @@ defineProps<{
     planes: PlanPago[];
 }>();
 
+const { money, date, statusClass } = useFormatters();
+
 const page = usePage<{ flash?: { pagoQr?: PagoQr | null }; errors?: { pago?: string } }>();
 const processingVentaId = ref<number | null>(null);
 const pagoQr = computed(() => page.props.flash?.pagoQr ?? null);
@@ -56,15 +62,6 @@ const qrSrc = computed(() => {
     return pagoQr.value.qrBase64.startsWith('data:') ? pagoQr.value.qrBase64 : `data:image/png;base64,${pagoQr.value.qrBase64}`;
 });
 
-const money = (value: string | number) =>
-    new Intl.NumberFormat('es-BO', {
-        style: 'currency',
-        currency: 'BOB',
-    }).format(Number(value));
-
-const date = (value: string) => new Date(value).toLocaleDateString('es-BO');
-const isPaid = (estado: string) => ['PAGADA', 'PAGADO'].includes(estado.toUpperCase());
-
 const progress = (plan: PlanPago) => {
     const total = Number(plan.venta.total);
 
@@ -74,11 +71,6 @@ const progress = (plan: PlanPago) => {
 
     return Math.min(100, Math.round((Number(plan.total_pagado) / total) * 100));
 };
-
-const statusClass = (estado: string) =>
-    isPaid(estado)
-        ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
-        : 'border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400';
 
 const generateQr = (plan: PlanPago) => {
     processingVentaId.value = plan.venta.id;
@@ -99,18 +91,12 @@ const generateQr = (plan: PlanPago) => {
     <Head title="Pagos" />
 
     <CustomerLayout>
-        <section class="overflow-hidden rounded-3xl border bg-gradient-to-br from-card via-card to-primary/10 p-6 shadow-sm md:p-8">
-            <div class="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-                <div class="space-y-2">
-                    <p class="text-sm font-semibold uppercase tracking-wide text-primary">Pagos</p>
-                    <h1 class="text-3xl font-semibold tracking-tight md:text-4xl">Planes y cuotas</h1>
-                    <p class="max-w-2xl text-muted-foreground">Consulta tus cuotas pendientes, vencimientos y pagos registrados.</p>
-                </div>
-                <div class="flex size-16 items-center justify-center rounded-2xl border bg-background/70 shadow-sm">
-                    <WalletCards class="size-8 text-primary" />
-                </div>
-            </div>
-        </section>
+        <PageHeader
+            eyebrow="Pagos"
+            title="Planes y cuotas"
+            description="Consulta tus cuotas pendientes, vencimientos y pagos registrados."
+            :icon="WalletCards"
+        />
 
         <Card v-if="pagoQr" class="overflow-hidden border-primary/40 bg-gradient-to-br from-primary/10 via-card to-card shadow-md">
             <CardHeader class="gap-4 border-b bg-background/35 sm:flex-row sm:items-start sm:justify-between">
@@ -161,11 +147,13 @@ const generateQr = (plan: PlanPago) => {
                             <CardDescription class="mt-1">Compra del {{ date(plan.venta.fecha) }}</CardDescription>
                         </div>
                         <div class="flex flex-wrap gap-2">
-                            <span class="rounded-full border bg-background px-3 py-1 text-xs font-medium">{{ plan.tipo_pago }}</span>
-                            <span class="rounded-full border px-3 py-1 text-xs font-medium" :class="statusClass(plan.estado_plan)">{{
-                                plan.estado_plan
+                            <span class="inline-flex items-center rounded-full border bg-background px-3 py-1 text-xs font-medium">{{
+                                plan.tipo_pago
                             }}</span>
-                            <span class="rounded-full border bg-background px-3 py-1 text-xs font-medium">{{ progress(plan) }}% pagado</span>
+                            <StatusBadge :estado="plan.estado_plan" />
+                            <span class="inline-flex items-center rounded-full border bg-background px-3 py-1 text-xs font-medium"
+                                >{{ progress(plan) }}% pagado</span
+                            >
                         </div>
                     </div>
                     <div class="rounded-2xl border bg-background px-5 py-4 text-left shadow-sm sm:min-w-44 sm:text-right">
@@ -204,17 +192,14 @@ const generateQr = (plan: PlanPago) => {
                             <p class="font-medium">Cuota {{ cuota.nro_cuota }}</p>
                             <p class="text-sm text-muted-foreground">Vence {{ date(cuota.fecha_vencimiento) }}</p>
                             <p class="font-semibold sm:text-right">{{ money(cuota.monto) }}</p>
-                            <p
-                                class="justify-self-start rounded-full border px-3 py-1 text-xs font-semibold sm:justify-self-end"
-                                :class="statusClass(cuota.estado_cuota)"
-                            >
-                                {{ cuota.estado_cuota }}
-                            </p>
+                            <div class="justify-self-start sm:justify-self-end">
+                                <StatusBadge :estado="cuota.estado_cuota" />
+                            </div>
                         </div>
                     </div>
 
                     <Button
-                        class="w-full rounded-xl sm:w-auto"
+                        class="w-full rounded-full sm:w-auto"
                         :disabled="!plan.proxima_cuota || processingVentaId === plan.venta.id"
                         @click="generateQr(plan)"
                     >
@@ -226,12 +211,11 @@ const generateQr = (plan: PlanPago) => {
             </Card>
         </section>
 
-        <div v-else class="flex min-h-64 flex-col items-center justify-center gap-3 rounded-3xl border border-dashed text-center">
-            <CreditCard class="size-12 text-muted-foreground" />
-            <div>
-                <p class="font-medium">No tienes pagos registrados</p>
-                <p class="text-sm text-muted-foreground">Los planes de pago aparecerán cuando tengas ventas con cuotas.</p>
-            </div>
-        </div>
+        <EmptyState
+            v-else
+            :icon="CreditCard"
+            title="No tienes pagos registrados"
+            description="Los planes de pago aparecerán cuando tengas ventas con cuotas."
+        />
     </CustomerLayout>
 </template>

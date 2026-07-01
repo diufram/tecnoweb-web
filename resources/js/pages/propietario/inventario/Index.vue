@@ -1,6 +1,11 @@
 <script setup lang="ts">
+import DataTable from '@/components/shared/DataTable.vue';
+import EmptyState from '@/components/shared/EmptyState.vue';
+import PageHeader from '@/components/shared/PageHeader.vue';
+import PageToolbar from '@/components/shared/PageToolbar.vue';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { useFormatters } from '@/composables/useFormatters';
 import AdminLayout from '@/layouts/admin/AdminLayout.vue';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/vue3';
@@ -17,42 +22,22 @@ interface Inventario {
 defineProps<{ inventarios: Inventario[] }>();
 const breadcrumbs: BreadcrumbItem[] = [{ title: 'Inventario', href: route('propietario.inventario.index') }];
 
-const money = (value: string | number) =>
-    new Intl.NumberFormat('es-BO', {
-        style: 'currency',
-        currency: 'BOB',
-    }).format(Number(value));
-
-const date = (value: string) => new Date(value).toLocaleDateString('es-BO');
+const { money, date } = useFormatters();
 </script>
 
 <template>
     <Head title="Inventario" />
     <AdminLayout actor="propietario" :breadcrumbs="breadcrumbs">
         <div class="flex flex-1 flex-col gap-6 p-4 md:p-6">
-            <section class="overflow-hidden rounded-3xl border bg-gradient-to-br from-card via-card to-primary/10 p-6 shadow-sm md:p-8">
-                <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div class="space-y-2">
-                        <p class="text-sm font-semibold uppercase tracking-wide text-primary">Gestion</p>
-                        <h1 class="text-3xl font-semibold tracking-tight md:text-4xl">Inventario</h1>
-                        <p class="max-w-2xl text-muted-foreground">Administra cantidades disponibles por producto y lote.</p>
-                    </div>
-                    <div class="flex size-16 items-center justify-center rounded-2xl border bg-background/70 shadow-sm">
-                        <Boxes class="size-8 text-primary" />
-                    </div>
-                </div>
-            </section>
+            <PageHeader eyebrow="Gestion" title="Inventario" description="Administra cantidades disponibles por producto y lote." :icon="Boxes" />
 
-            <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <p class="text-sm text-muted-foreground">
-                    Total registros: <span class="font-medium text-foreground">{{ inventarios.length }}</span>
-                </p>
+            <PageToolbar :total="inventarios.length">
                 <Button as-child class="rounded-full">
                     <Link :href="route('propietario.inventario.create')"><Plus class="size-4" /> Nuevo registro</Link>
                 </Button>
-            </div>
+            </PageToolbar>
 
-            <div v-if="inventarios.length" class="overflow-hidden rounded-2xl border">
+            <DataTable v-if="inventarios.length">
                 <Table>
                     <TableHeader>
                         <TableRow class="grid grid-cols-[1fr_9rem_9rem_9rem_8rem_6rem] items-center gap-4 rounded-t-2xl bg-muted hover:bg-muted">
@@ -98,19 +83,13 @@ const date = (value: string) => new Date(value).toLocaleDateString('es-BO');
                         </TableRow>
                     </TableBody>
                 </Table>
-            </div>
-            <div v-else class="flex min-h-56 flex-col items-center justify-center gap-3 rounded-3xl border border-dashed bg-card/40 text-center">
-                <div class="flex size-16 items-center justify-center rounded-2xl border bg-background/70">
-                    <Boxes class="size-8 text-muted-foreground" />
-                </div>
-                <div>
-                    <p class="font-medium">No hay inventario registrado</p>
-                    <p class="text-sm text-muted-foreground">Crea el primer registro para comenzar.</p>
-                </div>
+            </DataTable>
+
+            <EmptyState v-else :icon="Boxes" title="No hay inventario registrado" description="Crea el primer registro para comenzar.">
                 <Button as-child variant="outline" class="rounded-full">
                     <Link :href="route('propietario.inventario.create')">Crear registro</Link>
                 </Button>
-            </div>
+            </EmptyState>
         </div>
     </AdminLayout>
 </template>

@@ -1,7 +1,10 @@
 <script setup lang="ts">
+import PageHeader from '@/components/shared/PageHeader.vue';
+import StatusBadge from '@/components/shared/StatusBadge.vue';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { useFormatters } from '@/composables/useFormatters';
 import AdminLayout from '@/layouts/admin/AdminLayout.vue';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/vue3';
@@ -38,13 +41,7 @@ const props = defineProps<{
     puede_contraofertar: boolean;
 }>();
 
-const money = (value: string | number) =>
-    new Intl.NumberFormat('es-BO', {
-        style: 'currency',
-        currency: 'BOB',
-    }).format(Number(value));
-
-const date = (value: string) => new Date(value).toLocaleDateString('es-BO');
+const { money, date } = useFormatters();
 
 const form = useForm<{
     estado: 'APROBADO' | 'RECHAZADO' | 'CONTRA_OFERTA';
@@ -76,22 +73,6 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Solicitudes', href: route('proveedor.solicitudes') },
     { title: `Compra #${props.compra.id}`, href: '#' },
 ];
-
-const statusClass = (estado: string) => {
-    switch (estado) {
-        case 'APROBADO':
-            return 'border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400';
-        case 'RECHAZADO':
-            return 'border-destructive/30 bg-destructive/10 text-destructive';
-        case 'CONTRA_OFERTA':
-            return 'border-blue-500/30 bg-blue-500/10 text-blue-600 dark:text-blue-400';
-        default:
-            return 'border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400';
-    }
-};
-
-const inputClass =
-    'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring';
 </script>
 
 <template>
@@ -99,16 +80,18 @@ const inputClass =
 
     <AdminLayout actor="proveedor" :breadcrumbs="breadcrumbs">
         <div class="flex flex-1 flex-col gap-6 p-4 md:p-6">
-            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <section class="space-y-2">
-                    <p class="text-sm font-medium text-muted-foreground">Detalle de compra</p>
-                    <h1 class="text-3xl font-semibold tracking-tight">Compra #{{ compra.id }}</h1>
-                    <p class="max-w-2xl text-muted-foreground">Revisa la solicitud y responde segun corresponda.</p>
-                </section>
-                <Button as-child variant="outline" class="rounded-full">
-                    <Link :href="route('proveedor.historial')"><ArrowLeft class="size-4" /> Volver al historial</Link>
-                </Button>
-            </div>
+            <PageHeader
+                eyebrow="Detalle de compra"
+                :title="`Compra #${compra.id}`"
+                description="Revisa la solicitud y responde segun corresponda."
+                :icon="Handshake"
+            >
+                <div class="flex justify-end">
+                    <Button as-child variant="outline" class="rounded-full">
+                        <Link :href="route('proveedor.historial')"><ArrowLeft class="size-4" /> Volver al historial</Link>
+                    </Button>
+                </div>
+            </PageHeader>
 
             <div class="grid gap-6 lg:grid-cols-[1fr_24rem]">
                 <div class="space-y-6">
@@ -118,12 +101,7 @@ const inputClass =
                                 <CardTitle class="text-xl">Solicitud</CardTitle>
                                 <CardDescription>Enviada por {{ compra.propietario.nombre ?? 'Propietario' }}</CardDescription>
                             </div>
-                            <span
-                                class="inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold"
-                                :class="statusClass(compra.estado)"
-                            >
-                                {{ compra.estado }}
-                            </span>
+                            <StatusBadge :estado="compra.estado" />
                         </CardHeader>
                         <CardContent class="grid gap-4 sm:grid-cols-3">
                             <div class="rounded-2xl border bg-muted/50 p-4">
