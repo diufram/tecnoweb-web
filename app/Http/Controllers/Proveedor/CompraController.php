@@ -19,33 +19,24 @@ class CompraController extends Controller
 {
     private const ESTADOS_RESPUESTA = ['APROBADO', 'RECHAZADO', 'CONTRA_OFERTA'];
 
-    private const ESTADOS_FILTRO = [
-        'solicitudes' => ['SOLICITUD'],
-        'contraofertas' => ['CONTRA_OFERTA'],
-        'compras' => ['APROBADO', 'RECHAZADO'],
-        'historial' => ['SOLICITUD', 'CONTRA_OFERTA', 'APROBADO', 'RECHAZADO'],
-    ];
-
-    public function index(Request $request): Response
+    public function solicitudes(Request $request): Response
     {
-        $tipo = $this->resolverTipo($request);
+        return $this->renderList($request, 'proveedor/Solicitudes', ['SOLICITUD']);
+    }
 
-        abort_unless(array_key_exists($tipo, self::ESTADOS_FILTRO), 404);
+    public function contraofertas(Request $request): Response
+    {
+        return $this->renderList($request, 'proveedor/Contraofertas', ['CONTRA_OFERTA']);
+    }
 
-        $proveedorId = $this->proveedorId($request);
+    public function compras(Request $request): Response
+    {
+        return $this->renderList($request, 'proveedor/Compras', ['APROBADO', 'RECHAZADO']);
+    }
 
-        $compras = $this->baseQuery($proveedorId)
-            ->whereIn('estado', self::ESTADOS_FILTRO[$tipo])
-            ->orderByDesc('fecha_emision')
-            ->get()
-            ->map(fn (Compra $compra) => $this->mapCompra($compra));
-
-        return Inertia::render('proveedor/Compras', [
-            'compras' => $compras->values(),
-            'tipo' => $tipo,
-            'titulo' => $this->titulo($tipo),
-            'descripcion' => $this->descripcion($tipo),
-        ]);
+    public function historial(Request $request): Response
+    {
+        return $this->renderList($request, 'proveedor/Historial', ['SOLICITUD', 'CONTRA_OFERTA', 'APROBADO', 'RECHAZADO']);
     }
 
     public function show(Request $request, Compra $compra): Response
@@ -161,6 +152,21 @@ class CompraController extends Controller
         ]);
     }
 
+    private function renderList(Request $request, string $component, array $estados): Response
+    {
+        $proveedorId = $this->proveedorId($request);
+
+        $compras = $this->baseQuery($proveedorId)
+            ->whereIn('estado', $estados)
+            ->orderByDesc('fecha_emision')
+            ->get()
+            ->map(fn (Compra $compra) => $this->mapCompra($compra));
+
+        return Inertia::render($component, [
+            'compras' => $compras->values(),
+        ]);
+    }
+
     private function baseQuery(int $proveedorId): Builder
     {
         return Compra::query()
@@ -199,21 +205,6 @@ class CompraController extends Controller
         abort_unless($compra->id_proveedor === $proveedorId, 403);
     }
 
-    private function resolverTipo(Request $request): string
-    {
-        $name = optional($request->route())->getName();
-
-        if ($name && str_starts_with($name, 'proveedor.')) {
-            $segmento = substr($name, strlen('proveedor.'));
-
-            if (array_key_exists($segmento, self::ESTADOS_FILTRO)) {
-                return $segmento;
-            }
-        }
-
-        abort(404);
-    }
-
     private function proveedorId(Request $request): int
     {
         $proveedorId = $request->user()->proveedor?->id_usuario;
@@ -223,25 +214,5 @@ class CompraController extends Controller
         abort_unless($proveedor, 403);
 
         return $proveedor->id_usuario;
-    }
-
-    private function titulo(string $tipo): string
-    {
-        return match ($tipo) {
-            'solicitudes' => 'Solicitudes',
-            'contraofertas' => 'Contraofertas',
-            'compras' => 'Compras',
-            'historial' => 'Historial',
-        };
-    }
-
-    private function descripcion(string $tipo): string
-    {
-        return match ($tipo) {
-            'solicitudes' => 'Revisa las solicitudes de compra enviadas por el propietario y responde aceptando, rechazando o proponiendo una contraoferta.',
-            'contraofertas' => 'Compras con contraoferta activa. Puedes ajustar precio o cantidad desde el detalle.',
-            'compras' => 'Compras finalizadas: aprobadas o rechazadas.',
-            'historial' => 'Todas las compras en las que participaste, ordenadas por fecha.',
-        };
     }
 }

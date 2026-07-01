@@ -45,7 +45,6 @@ const statCards = computed<StatItem[]>(() => [
     <AdminLayout actor="proveedor" :breadcrumbs="breadcrumbs">
         <div class="flex flex-1 flex-col gap-6 p-4 md:p-6">
             <PageHeader
-                eyebrow="Panel proveedor"
                 title="Solicitudes y contraofertas"
                 description="Revisa solicitudes de compra, responde contraofertas y consulta tu historial comercial."
                 :icon="ShoppingCart"

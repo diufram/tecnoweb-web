@@ -6,7 +6,7 @@ import ComprasList from '@/pages/proveedor/ComprasList.vue';
 import ProveedorSectionNav from '@/pages/proveedor/ProveedorSectionNav.vue';
 import type { BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/vue3';
-import { ShoppingCart } from 'lucide-vue-next';
+import { Handshake } from 'lucide-vue-next';
 
 interface CompraDetalle {
     id: number;
@@ -36,24 +36,28 @@ defineProps<{
     compras: Compra[];
 }>();
 
-const breadcrumbs: BreadcrumbItem[] = [{ title: 'Compras', href: '#' }];
+const breadcrumbs: BreadcrumbItem[] = [{ title: 'Contraofertas', href: '#' }];
 </script>
 
 <template>
-    <Head title="Compras" />
+    <Head title="Contraofertas" />
 
     <AdminLayout actor="proveedor" :breadcrumbs="breadcrumbs">
         <div class="flex flex-1 flex-col gap-6 p-4 md:p-6">
-            <PageHeader title="Compras" description="Compras finalizadas: aprobadas o rechazadas." :icon="ShoppingCart" />
+            <PageHeader
+                title="Contraofertas"
+                description="Compras con contraoferta activa. Puedes ajustar precio o cantidad desde el detalle."
+                :icon="Handshake"
+            />
 
-            <ProveedorSectionNav current="compras" />
+            <ProveedorSectionNav current="contraofertas" />
 
             <PageToolbar :total="compras.length" />
 
             <ComprasList
                 :compras="compras"
-                empty-title="No tienes compras finalizadas"
-                empty-description="Cuando apruebes o rechaces una solicitud, aparecera aqui."
+                empty-title="No hay contraofertas activas"
+                empty-description="Cuando respondas con una propuesta, aparecera aqui."
             />
         </div>
     </AdminLayout>
