@@ -31,6 +31,7 @@ class InventarioController extends Controller
             'mode' => 'create',
             'inventario' => null,
             'productos' => $this->productosOptions(),
+            'lotes' => $this->lotesOptions(),
         ]);
     }
 
@@ -39,15 +40,9 @@ class InventarioController extends Controller
         $validated = $this->validateInventario($request);
 
         DB::transaction(function () use ($validated) {
-            $lote = Lote::create([
-                'codigo_lote' => $validated['codigo_lote'],
-                'fecha_ingreso' => $validated['fecha_ingreso'],
-                'fecha_vencimiento' => $validated['fecha_vencimiento'],
-            ]);
-
             Inventario::create([
                 'id_producto' => $validated['id_producto'],
-                'id_lote' => $lote->id,
+                'id_lote' => $validated['id_lote'],
                 'cantidad_disponible' => $validated['cantidad_disponible'],
                 'costo_unitario_lote' => $validated['costo_unitario_lote'],
             ]);
@@ -67,31 +62,25 @@ class InventarioController extends Controller
             'inventario' => [
                 'id' => $inventario->id,
                 'id_producto' => $inventario->id_producto,
+                'id_lote' => $inventario->id_lote,
                 'cantidad_disponible' => $inventario->cantidad_disponible,
                 'costo_unitario_lote' => $inventario->costo_unitario_lote,
-                'codigo_lote' => $inventario->lote->codigo_lote,
-                'fecha_ingreso' => $inventario->lote->fecha_ingreso?->toDateString(),
-                'fecha_vencimiento' => $inventario->lote->fecha_vencimiento?->toDateString(),
             ],
             'productos' => $this->productosOptions(),
+            'lotes' => $this->lotesOptions(),
         ]);
     }
 
     public function update(Request $request, Inventario $inventario): RedirectResponse
     {
-        $validated = $this->validateInventario($request, $inventario);
+        $validated = $this->validateInventario($request);
 
         DB::transaction(function () use ($validated, $inventario) {
             $previousProductId = $inventario->id_producto;
 
-            $inventario->lote->update([
-                'codigo_lote' => $validated['codigo_lote'],
-                'fecha_ingreso' => $validated['fecha_ingreso'],
-                'fecha_vencimiento' => $validated['fecha_vencimiento'],
-            ]);
-
             $inventario->update([
                 'id_producto' => $validated['id_producto'],
+                'id_lote' => $validated['id_lote'],
                 'cantidad_disponible' => $validated['cantidad_disponible'],
                 'costo_unitario_lote' => $validated['costo_unitario_lote'],
             ]);
@@ -104,25 +93,18 @@ class InventarioController extends Controller
     }
 
     /** @return array<string, mixed> */
-    private function validateInventario(Request $request, ?Inventario $inventario = null): array
+    private function validateInventario(Request $request): array
     {
         return $request->validate([
             'id_producto' => ['required', 'integer', Rule::exists('producto', 'id')->whereNull('deleted_at')],
-            'codigo_lote' => ['required', 'string', 'min:3', 'max:255', Rule::unique('lote', 'codigo_lote')->ignore($inventario?->id_lote)->whereNull('deleted_at')],
-            'fecha_ingreso' => ['required', 'date'],
-            'fecha_vencimiento' => ['required', 'date', 'after_or_equal:fecha_ingreso'],
+            'id_lote' => ['required', 'integer', Rule::exists('lote', 'id')->whereNull('deleted_at')],
             'cantidad_disponible' => ['required', 'integer', 'min:0', 'max:1000000'],
             'costo_unitario_lote' => ['required', 'numeric', 'min:0', 'max:9999999999.99'],
         ], [
             'id_producto.required' => 'Selecciona un producto.',
             'id_producto.exists' => 'El producto seleccionado no existe.',
-            'codigo_lote.required' => 'El codigo de lote es obligatorio.',
-            'codigo_lote.min' => 'El codigo de lote debe tener al menos 3 caracteres.',
-            'codigo_lote.unique' => 'Ya existe un lote con ese codigo.',
-            'fecha_ingreso.required' => 'La fecha de ingreso es obligatoria.',
-            'fecha_ingreso.date' => 'La fecha de ingreso no es valida.',
-            'fecha_vencimiento.required' => 'La fecha de vencimiento es obligatoria.',
-            'fecha_vencimiento.after_or_equal' => 'La fecha de vencimiento debe ser posterior o igual a la fecha de ingreso.',
+            'id_lote.required' => 'Selecciona un lote.',
+            'id_lote.exists' => 'El lote seleccionado no existe.',
             'cantidad_disponible.required' => 'La cantidad disponible es obligatoria.',
             'cantidad_disponible.integer' => 'La cantidad disponible debe ser un numero entero.',
             'cantidad_disponible.min' => 'La cantidad disponible no puede ser negativa.',
@@ -137,6 +119,13 @@ class InventarioController extends Controller
         return Producto::query()
             ->orderBy('nombre_comercial')
             ->get(['id', 'nombre_comercial']);
+    }
+
+    private function lotesOptions(): mixed
+    {
+        return Lote::query()
+            ->orderBy('codigo_lote')
+            ->get(['id', 'codigo_lote', 'fecha_ingreso', 'fecha_vencimiento']);
     }
 
     private function syncProductStock(int $productoId): void

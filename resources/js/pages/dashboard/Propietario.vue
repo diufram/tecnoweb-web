@@ -1,9 +1,13 @@
 <script setup lang="ts">
+import EmptyState from '@/components/shared/EmptyState.vue';
+import PageHeader from '@/components/shared/PageHeader.vue';
+import StatGrid from '@/components/shared/StatGrid.vue';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import AdminLayout from '@/layouts/admin/AdminLayout.vue';
 import type { BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/vue3';
-import { Boxes, Package, ShoppingCart, Truck, Users } from 'lucide-vue-next';
+import { Boxes, LayoutGrid, Package, ShoppingCart, Truck, Users } from 'lucide-vue-next';
+import { computed, type Component } from 'vue';
 
 defineProps<{
     stats: {
@@ -20,6 +24,22 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: route('dashboard.propietario'),
     },
 ];
+
+interface StatItem {
+    title: string;
+    value: number;
+    description: string;
+    icon: Component;
+    href: string;
+}
+
+const statCards = computed<StatItem[]>(() => [
+    { title: 'Productos', value: 0, description: 'Productos registrados', icon: Package, href: route('propietario.productos.index') },
+    { title: 'Inventario', value: 0, description: 'Registros de inventario', icon: Boxes, href: route('propietario.inventario.index') },
+    { title: 'Compras', value: 0, description: 'Solicitudes a proveedores', icon: ShoppingCart, href: route('propietario.compras.index') },
+    { title: 'Clientes', value: 0, description: 'Cuentas cliente activas', icon: Users, href: route('propietario.clientes.index') },
+    { title: 'Proveedores', value: 0, description: 'Aliados registrados', icon: Truck, href: route('propietario.proveedores.index') },
+]);
 </script>
 
 <template>
@@ -27,59 +47,16 @@ const breadcrumbs: BreadcrumbItem[] = [
 
     <AdminLayout actor="propietario" :breadcrumbs="breadcrumbs">
         <div class="flex flex-1 flex-col gap-6 p-4 md:p-6">
-            <section class="space-y-2">
-                <p class="text-sm font-medium text-muted-foreground">Panel administrativo</p>
-                <h1 class="text-3xl font-semibold tracking-tight">Resumen general</h1>
-                <p class="max-w-2xl text-muted-foreground">Gestiona productos, inventario, compras, clientes y proveedores desde un solo lugar.</p>
-            </section>
+            <PageHeader
+                eyebrow="Panel administrativo"
+                title="Resumen general"
+                description="Gestiona productos, inventario, compras, clientes y proveedores desde un solo lugar."
+                :icon="LayoutGrid"
+            />
 
-            <section class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                <Card>
-                    <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle class="text-sm font-medium">Productos</CardTitle>
-                        <Package class="size-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div class="text-3xl font-bold">{{ stats.productos }}</div>
-                        <p class="text-xs text-muted-foreground">Productos registrados</p>
-                    </CardContent>
-                </Card>
+            <StatGrid :stats="statCards" />
 
-                <Card>
-                    <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle class="text-sm font-medium">Clientes</CardTitle>
-                        <Users class="size-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div class="text-3xl font-bold">{{ stats.clientes }}</div>
-                        <p class="text-xs text-muted-foreground">Cuentas cliente activas</p>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle class="text-sm font-medium">Proveedores</CardTitle>
-                        <Truck class="size-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div class="text-3xl font-bold">{{ stats.proveedores }}</div>
-                        <p class="text-xs text-muted-foreground">Aliados registrados</p>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader class="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle class="text-sm font-medium">Compras</CardTitle>
-                        <ShoppingCart class="size-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div class="text-3xl font-bold">{{ stats.compras }}</div>
-                        <p class="text-xs text-muted-foreground">Solicitudes de compra</p>
-                    </CardContent>
-                </Card>
-            </section>
-
-            <Card class="min-h-80">
+            <Card class="border-muted/80 bg-card/95 shadow-sm">
                 <CardHeader>
                     <div class="flex items-center gap-2">
                         <Boxes class="size-5 text-muted-foreground" />
@@ -87,6 +64,13 @@ const breadcrumbs: BreadcrumbItem[] = [
                     </div>
                     <CardDescription>Este espacio queda listo para tablas de inventario, alertas de stock y compras recientes.</CardDescription>
                 </CardHeader>
+                <CardContent>
+                    <EmptyState
+                        :icon="ShoppingCart"
+                        title="Sin pendientes por ahora"
+                        description="Las solicitudes de compra, contraofertas y alertas apareceran aqui."
+                    />
+                </CardContent>
             </Card>
         </div>
     </AdminLayout>

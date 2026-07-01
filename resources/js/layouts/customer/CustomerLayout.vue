@@ -6,19 +6,26 @@ import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import type { SharedData, User } from '@/types';
 import { Link, usePage } from '@inertiajs/vue3';
-import { CreditCard, Home, PackageSearch, Palette, ReceiptText, UserRound } from 'lucide-vue-next';
+import { CreditCard, Home, PackageSearch, Palette, ReceiptText, ShoppingCart, UserRound } from 'lucide-vue-next';
 
 const page = usePage<SharedData>();
 const user = page.props.auth.user as User;
 
 const navItems = [
     { title: 'Inicio', href: route('dashboard.cliente'), icon: Home },
-    { title: 'Catálogo', href: '#catalogo', icon: PackageSearch },
-    { title: 'Mis compras', href: '#compras', icon: ReceiptText },
-    { title: 'Pagos', href: '#pagos', icon: CreditCard },
+    { title: 'Catálogo', href: route('cliente.catalogo'), icon: PackageSearch },
+    { title: 'Carrito', href: route('cliente.carrito'), icon: ShoppingCart },
+    { title: 'Mis compras', href: route('cliente.compras'), icon: ReceiptText },
+    { title: 'Pagos', href: route('cliente.pagos'), icon: CreditCard },
     { title: 'Perfil', href: route('profile.edit'), icon: UserRound },
     { title: 'Apariencia', href: route('appearance'), icon: Palette },
 ];
+
+const isCurrent = (href: string) => {
+    const path = href.replace(/^https?:\/\/[^/]+/, '');
+
+    return page.url === path || page.url.startsWith(`${path}?`);
+};
 </script>
 
 <template>
@@ -33,7 +40,7 @@ const navItems = [
                 </Link>
 
                 <nav class="hidden items-center gap-1 md:flex">
-                    <Button v-for="item in navItems" :key="item.title" as-child variant="ghost" :class="item.href === page.url ? 'bg-muted' : ''">
+                    <Button v-for="item in navItems" :key="item.title" as-child variant="ghost" :class="isCurrent(item.href) ? 'bg-muted' : ''">
                         <Link :href="item.href">
                             <component :is="item.icon" class="size-4" />
                             {{ item.title }}
@@ -53,6 +60,24 @@ const navItems = [
                 </DropdownMenu>
             </div>
         </header>
+
+        <nav class="border-b bg-background md:hidden">
+            <div class="mx-auto flex w-full max-w-7xl gap-2 overflow-x-auto px-4 py-2 sm:px-6 lg:px-8">
+                <Button
+                    v-for="item in navItems"
+                    :key="item.title"
+                    as-child
+                    variant="ghost"
+                    class="shrink-0"
+                    :class="isCurrent(item.href) ? 'bg-muted' : ''"
+                >
+                    <Link :href="item.href">
+                        <component :is="item.icon" class="size-4" />
+                        {{ item.title }}
+                    </Link>
+                </Button>
+            </div>
+        </nav>
 
         <main class="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
             <slot />

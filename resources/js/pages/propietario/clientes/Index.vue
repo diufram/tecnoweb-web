@@ -1,14 +1,12 @@
 <script setup lang="ts">
+import DataTable from '@/components/shared/DataTable.vue';
+import EmptyState from '@/components/shared/EmptyState.vue';
+import PageHeader from '@/components/shared/PageHeader.vue';
+import PageToolbar from '@/components/shared/PageToolbar.vue';
 import { Button } from '@/components/ui/button';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { useFormatters } from '@/composables/useFormatters';
 import AdminLayout from '@/layouts/admin/AdminLayout.vue';
 import type { BreadcrumbItem } from '@/types';
 import { Head, Link, useForm } from '@inertiajs/vue3';
@@ -68,6 +66,8 @@ const confirmDelete = () => {
         },
     });
 };
+
+const { money } = useFormatters();
 </script>
 
 <template>
@@ -75,51 +75,64 @@ const confirmDelete = () => {
 
     <AdminLayout actor="propietario" :breadcrumbs="breadcrumbs">
         <div class="flex flex-1 flex-col gap-6 p-4 md:p-6">
-            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <section class="space-y-2">
-                    <div class="flex items-center gap-2">
-                        <Users class="size-7 text-muted-foreground" />
-                        <h1 class="text-3xl font-semibold tracking-tight">Clientes</h1>
-                    </div>
-                    <p class="text-sm font-medium text-muted-foreground">Gestion de clientes</p>
-                    <p class="max-w-2xl text-muted-foreground">Administra las cuentas cliente, sus datos de facturacion y linea de credito.</p>
-                </section>
+            <PageHeader
+                eyebrow="Gestion"
+                title="Clientes"
+                description="Administra las cuentas cliente, sus datos de facturacion y linea de credito."
+                :icon="Users"
+            />
 
-                <Button as-child>
+            <PageToolbar :total="clientes.length">
+                <Button as-child class="rounded-full">
                     <Link :href="route('propietario.clientes.create')">
                         <Plus class="size-4" />
-                        Nuevo
+                        Nuevo cliente
                     </Link>
                 </Button>
-            </div>
+            </PageToolbar>
 
-            <div v-if="clientes.length" class="rounded-md border">
+            <DataTable v-if="clientes.length">
                 <Table>
                     <TableHeader>
-                        <TableRow class="grid grid-cols-[1.3fr_1fr_8rem_8rem_8rem] items-center gap-4 bg-muted hover:bg-muted">
+                        <TableRow class="grid grid-cols-[1.3fr_1fr_8rem_8rem_8rem] items-center gap-4 rounded-t-2xl bg-muted hover:bg-muted">
                             <TableHead class="min-h-12 px-4 py-3 text-muted-foreground">Cliente</TableHead>
                             <TableHead class="min-h-12 px-4 py-3 text-muted-foreground">Contacto</TableHead>
-                            <TableHead class="min-h-12 px-4 py-3 text-muted-foreground">Linea</TableHead>
-                            <TableHead class="min-h-12 px-4 py-3 text-muted-foreground">Saldo</TableHead>
-                            <TableHead class="min-h-12 px-4 py-3 text-muted-foreground">Acciones</TableHead>
+                            <TableHead class="min-h-12 px-4 py-3 text-right text-muted-foreground">Linea</TableHead>
+                            <TableHead class="min-h-12 px-4 py-3 text-right text-muted-foreground">Saldo</TableHead>
+                            <TableHead class="min-h-12 px-4 py-3 text-right text-muted-foreground">Acciones</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        <TableRow v-for="cliente in clientes" :key="cliente.id_usuario" class="grid grid-cols-[1.3fr_1fr_8rem_8rem_8rem] items-center gap-4 px-4 hover:bg-transparent">
-                            <TableCell class="p-2">
+                        <TableRow
+                            v-for="cliente in clientes"
+                            :key="cliente.id_usuario"
+                            class="grid grid-cols-[1.3fr_1fr_8rem_8rem_8rem] items-center gap-4 px-4 transition hover:bg-muted/40"
+                        >
+                            <TableCell class="p-3">
                                 <p class="truncate font-medium">{{ cliente.usuario.nombre }}</p>
-                                <p class="text-xs text-muted-foreground">CI/NIT: {{ cliente.usuario.ci_nit }} · Facturacion: {{ cliente.nit_facturacion }}</p>
+                                <p class="text-xs text-muted-foreground">
+                                    CI/NIT: {{ cliente.usuario.ci_nit }} · Facturacion: {{ cliente.nit_facturacion }}
+                                </p>
                             </TableCell>
 
-                            <TableCell class="p-2 text-sm">
+                            <TableCell class="p-3 text-sm">
                                 <p class="truncate">{{ cliente.usuario.email }}</p>
                                 <p class="truncate text-xs text-muted-foreground">{{ cliente.usuario.telefono }}</p>
                             </TableCell>
 
-                            <TableCell class="p-2 text-right font-semibold tabular-nums">{{ Number(cliente.linea_credito).toFixed(2) }}</TableCell>
-                            <TableCell class="p-2 text-right font-semibold tabular-nums">{{ Number(cliente.saldo_actual).toFixed(2) }}</TableCell>
+                            <TableCell class="p-3 text-right">
+                                <span class="inline-flex items-center rounded-full border bg-background px-3 py-1 text-sm font-semibold tabular-nums">
+                                    {{ money(cliente.linea_credito) }}
+                                </span>
+                            </TableCell>
 
-                            <TableCell class="p-2">
+                            <TableCell class="p-3 text-right">
+                                <span class="inline-flex items-center rounded-full border bg-background px-3 py-1 text-sm font-semibold tabular-nums">
+                                    {{ money(cliente.saldo_actual) }}
+                                </span>
+                            </TableCell>
+
+                            <TableCell class="p-3">
                                 <div class="flex justify-end gap-1">
                                     <Button as-child variant="ghost" size="icon" aria-label="Editar cliente">
                                         <Link :href="route('propietario.clientes.edit', cliente.id_usuario)">
@@ -135,18 +148,13 @@ const confirmDelete = () => {
                         </TableRow>
                     </TableBody>
                 </Table>
-            </div>
+            </DataTable>
 
-            <div v-else class="flex min-h-56 flex-col items-center justify-center gap-3 rounded-md border border-dashed text-center">
-                <Users class="size-10 text-muted-foreground" />
-                <div>
-                    <p class="font-medium">No hay clientes registrados</p>
-                    <p class="text-sm text-muted-foreground">Crea el primer cliente para comenzar.</p>
-                </div>
-                <Button as-child variant="outline">
+            <EmptyState v-else :icon="Users" title="No hay clientes registrados" description="Crea el primer cliente para comenzar.">
+                <Button as-child variant="outline" class="rounded-full">
                     <Link :href="route('propietario.clientes.create')">Crear cliente</Link>
                 </Button>
-            </div>
+            </EmptyState>
         </div>
 
         <Dialog :open="target !== null" @update:open="(v) => (v ? null : closeDialog())">
@@ -154,7 +162,8 @@ const confirmDelete = () => {
                 <DialogHeader>
                     <DialogTitle>Eliminar cliente</DialogTitle>
                     <DialogDescription>
-                        Esta accion desactiva al cliente "{{ target?.usuario.nombre }}" y su usuario asociado. Podras reactivarlo desde la base de datos.
+                        Esta accion desactiva al cliente "{{ target?.usuario.nombre }}" y su usuario asociado. Podras reactivarlo desde la base de
+                        datos.
                     </DialogDescription>
                 </DialogHeader>
                 <DialogFooter>

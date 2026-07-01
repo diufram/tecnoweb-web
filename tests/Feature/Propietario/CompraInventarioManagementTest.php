@@ -39,11 +39,21 @@ function productoForStockManagement(array $attributes = []): Producto
     ], $attributes));
 }
 
+function loteForStockManagement(array $attributes = []): Lote
+{
+    return Lote::create(array_merge([
+        'codigo_lote' => 'LOTE-STOCK-TEST',
+        'fecha_ingreso' => now()->toDateString(),
+        'fecha_vencimiento' => now()->addMonth()->toDateString(),
+    ], $attributes));
+}
+
 test('propietario can list compras and inventario', function () {
     $user = propietarioUserForStockManagement();
 
     $this->actingAs($user)->get(route('propietario.compras.index'))->assertOk();
     $this->actingAs($user)->get(route('propietario.inventario.index'))->assertOk();
+    $this->actingAs($user)->get(route('propietario.lotes.index'))->assertOk();
 });
 
 test('propietario can create a compra with calculated total', function () {
@@ -57,9 +67,9 @@ test('propietario can create a compra with calculated total', function () {
             'fecha_emision' => now()->toDateString(),
             'observaciones' => 'Compra de reposicion',
             'id_proveedor' => $proveedor->id_usuario,
-            'id_producto' => $producto->id,
-            'cantidad' => 10,
-            'precio_unitario' => 5.5,
+            'detalles' => [
+                ['id_producto' => $producto->id, 'cantidad' => 10, 'precio_unitario' => 5.5],
+            ],
         ])
         ->assertRedirect(route('propietario.compras.index'));
 
@@ -79,7 +89,7 @@ test('propietario can create a compra with calculated total', function () {
 test('compra validates required fields', function () {
     $this->actingAs(propietarioUserForStockManagement())
         ->post(route('propietario.compras.store'), [])
-        ->assertSessionHasErrors(['estado', 'fecha_emision', 'observaciones', 'id_proveedor', 'id_producto', 'cantidad', 'precio_unitario']);
+        ->assertSessionHasErrors(['estado', 'fecha_emision', 'observaciones', 'id_proveedor', 'detalles']);
 });
 
 test('propietario can update a compra and replace detail', function () {
@@ -110,9 +120,9 @@ test('propietario can update a compra and replace detail', function () {
             'fecha_emision' => now()->toDateString(),
             'observaciones' => 'Actualizada',
             'id_proveedor' => $proveedor->id_usuario,
-            'id_producto' => $otroProducto->id,
-            'cantidad' => 4,
-            'precio_unitario' => 7,
+            'detalles' => [
+                ['id_producto' => $otroProducto->id, 'cantidad' => 4, 'precio_unitario' => 7],
+            ],
         ])
         ->assertRedirect(route('propietario.compras.index'));
 
@@ -129,50 +139,130 @@ test('propietario can update a compra and replace detail', function () {
     ]);
 });
 
-test('propietario can create inventario and sync product stock', function () {
+test('proveedor can counter offer multiple products and propietario can accept it', function () {
+    $owner = propietarioUserForStockManagement();
+    $proveedor = proveedorForStockManagement();
     $producto = productoForStockManagement();
+    $otroProducto = productoForStockManagement(['nombre_comercial' => 'Producto Contra Test']);
+
+    $compra = Compra::create([
+        'estado' => 'SOLICITUD',
+        'fecha_emision' => now()->toDateString(),
+        'monto_total' => 40,
+        'observaciones' => 'Solicitud multiple',
+        'id_propietario' => $owner->propietario->id_usuario,
+        'id_proveedor' => $proveedor->id_usuario,
+    ]);
+    $detalleUno = DetalleCompra::create([
+        'id_compra' => $compra->id,
+        'id_producto' => $producto->id,
+        'cantidad' => 2,
+        'precio_unitario' => 10,
+        'subtotal' => 20,
+    ]);
+    $detalleDos = DetalleCompra::create([
+        'id_compra' => $compra->id,
+        'id_producto' => $otroProducto->id,
+        'cantidad' => 4,
+        'precio_unitario' => 5,
+        'subtotal' => 20,
+    ]);
+
+    $this->actingAs($proveedor->usuario)
+        ->post(route('proveedor.responder', $compra), [
+            'estado' => 'CONTRA_OFERTA',
+            'detalles' => [
+                ['id' => $detalleUno->id, 'cantidad' => 3, 'precio_unitario' => 9],
+                ['id' => $detalleDos->id, 'cantidad' => 4, 'precio_unitario' => 6],
+            ],
+        ])
+        ->assertRedirect(route('proveedor.historial'));
+
+    $this->assertDatabaseHas('compra', [
+        'id' => $compra->id,
+        'estado' => 'CONTRA_OFERTA',
+        'monto_total' => 51,
+    ]);
+    $this->assertDatabaseHas('detalle_compra', [
+        'id' => $detalleUno->id,
+        'cantidad' => 2,
+        'subtotal' => 20,
+        'cantidad_contraoferta' => 3,
+        'subtotal_contraoferta' => 27,
+    ]);
+
+    $this->actingAs($owner)
+        ->post(route('propietario.compras.resolver-contraoferta', $compra), [
+            'estado' => 'APROBADO',
+        ])
+        ->assertRedirect(route('propietario.compras.show', $compra));
+
+    $this->assertDatabaseHas('compra', [
+        'id' => $compra->id,
+        'estado' => 'APROBADO',
+        'monto_total' => 51,
+    ]);
+});
+
+test('propietario can create a lote', function () {
+    $this->actingAs(propietarioUserForStockManagement())
+        ->post(route('propietario.lotes.store'), [
+            'codigo_lote' => 'LOTE-STOCK-001',
+            'fecha_ingreso' => now()->toDateString(),
+            'fecha_vencimiento' => now()->addMonth()->toDateString(),
+        ])
+        ->assertRedirect(route('propietario.lotes.index'));
+
+    $this->assertDatabaseHas('lote', ['codigo_lote' => 'LOTE-STOCK-001']);
+});
+
+test('lote validates required fields and date order', function () {
+    $this->actingAs(propietarioUserForStockManagement())
+        ->post(route('propietario.lotes.store'), [
+            'codigo_lote' => 'AB',
+            'fecha_ingreso' => now()->toDateString(),
+            'fecha_vencimiento' => now()->subDay()->toDateString(),
+        ])
+        ->assertSessionHasErrors(['codigo_lote', 'fecha_vencimiento']);
+});
+
+test('propietario can create inventario selecting an existing lote and sync product stock', function () {
+    $producto = productoForStockManagement();
+    $lote = loteForStockManagement(['codigo_lote' => 'LOTE-STOCK-001']);
 
     $this->actingAs(propietarioUserForStockManagement())
         ->post(route('propietario.inventario.store'), [
             'id_producto' => $producto->id,
-            'codigo_lote' => 'LOTE-STOCK-001',
-            'fecha_ingreso' => now()->toDateString(),
-            'fecha_vencimiento' => now()->addMonth()->toDateString(),
+            'id_lote' => $lote->id,
             'cantidad_disponible' => 25,
             'costo_unitario_lote' => 3.25,
         ])
         ->assertRedirect(route('propietario.inventario.index'));
 
-    $this->assertDatabaseHas('lote', ['codigo_lote' => 'LOTE-STOCK-001']);
     $this->assertDatabaseHas('inventario', [
         'id_producto' => $producto->id,
+        'id_lote' => $lote->id,
         'cantidad_disponible' => 25,
     ]);
     expect($producto->fresh()->stock_actual)->toBe(25);
 });
 
-test('inventario validates required fields and date order', function () {
+test('inventario validates required fields', function () {
     $producto = productoForStockManagement();
 
     $this->actingAs(propietarioUserForStockManagement())
         ->post(route('propietario.inventario.store'), [
             'id_producto' => $producto->id,
-            'codigo_lote' => 'LOTE-STOCK-002',
-            'fecha_ingreso' => now()->toDateString(),
-            'fecha_vencimiento' => now()->subDay()->toDateString(),
             'cantidad_disponible' => -1,
             'costo_unitario_lote' => -1,
         ])
-        ->assertSessionHasErrors(['fecha_vencimiento', 'cantidad_disponible', 'costo_unitario_lote']);
+        ->assertSessionHasErrors(['id_lote', 'cantidad_disponible', 'costo_unitario_lote']);
 });
 
 test('propietario can update inventario and resync stock', function () {
     $producto = productoForStockManagement();
-    $lote = Lote::create([
-        'codigo_lote' => 'LOTE-STOCK-003',
-        'fecha_ingreso' => now()->toDateString(),
-        'fecha_vencimiento' => now()->addMonth()->toDateString(),
-    ]);
+    $lote = loteForStockManagement(['codigo_lote' => 'LOTE-STOCK-003']);
+    $nuevoLote = loteForStockManagement(['codigo_lote' => 'LOTE-STOCK-003-A']);
     $inventario = Inventario::create([
         'id_producto' => $producto->id,
         'id_lote' => $lote->id,
@@ -183,15 +273,13 @@ test('propietario can update inventario and resync stock', function () {
     $this->actingAs(propietarioUserForStockManagement())
         ->patch(route('propietario.inventario.update', $inventario), [
             'id_producto' => $producto->id,
-            'codigo_lote' => 'LOTE-STOCK-003-A',
-            'fecha_ingreso' => now()->toDateString(),
-            'fecha_vencimiento' => now()->addMonths(2)->toDateString(),
+            'id_lote' => $nuevoLote->id,
             'cantidad_disponible' => 40,
             'costo_unitario_lote' => 4.5,
         ])
         ->assertRedirect(route('propietario.inventario.index'));
 
-    $this->assertDatabaseHas('lote', ['id' => $lote->id, 'codigo_lote' => 'LOTE-STOCK-003-A']);
-    $this->assertDatabaseHas('inventario', ['id' => $inventario->id, 'cantidad_disponible' => 40]);
+    $this->assertDatabaseHas('lote', ['id' => $lote->id, 'codigo_lote' => 'LOTE-STOCK-003']);
+    $this->assertDatabaseHas('inventario', ['id' => $inventario->id, 'id_lote' => $nuevoLote->id, 'cantidad_disponible' => 40]);
     expect($producto->fresh()->stock_actual)->toBe(40);
 });

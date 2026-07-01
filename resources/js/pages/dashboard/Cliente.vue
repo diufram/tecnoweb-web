@@ -1,8 +1,11 @@
 <script setup lang="ts">
+import PageHeader from '@/components/shared/PageHeader.vue';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useFormatters } from '@/composables/useFormatters';
 import CustomerLayout from '@/layouts/customer/CustomerLayout.vue';
-import { Head } from '@inertiajs/vue3';
-import { CreditCard, PackageSearch, ReceiptText } from 'lucide-vue-next';
+import { Head, Link } from '@inertiajs/vue3';
+import { CreditCard, PackageSearch, ReceiptText, WalletCards } from 'lucide-vue-next';
 
 defineProps<{
     stats: {
@@ -12,25 +15,20 @@ defineProps<{
     };
 }>();
 
-const money = (value: string | number) =>
-    new Intl.NumberFormat('es-BO', {
-        style: 'currency',
-        currency: 'BOB',
-    }).format(Number(value));
+const { money } = useFormatters();
 </script>
 
 <template>
     <Head title="Dashboard cliente" />
 
     <CustomerLayout>
-        <section class="overflow-hidden rounded-3xl border bg-card p-6 shadow-sm md:p-10">
-            <div class="grid gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
-                <div class="space-y-4">
-                    <p class="text-sm font-medium text-primary">Portal cliente</p>
-                    <h1 class="text-3xl font-semibold tracking-tight md:text-5xl">Compra medicamentos y controla tus pagos</h1>
-                    <p class="max-w-2xl text-muted-foreground">Explora el catálogo, revisa tu línea de crédito y mantén al día tus cuotas desde un panel pensado para clientes.</p>
-                </div>
-
+        <PageHeader
+            eyebrow="Portal cliente"
+            title="Compra medicamentos y controla tus pagos"
+            description="Explora el catálogo, revisa tu línea de crédito y mantén al día tus cuotas desde un panel pensado para clientes."
+            :icon="WalletCards"
+        >
+            <div class="grid gap-4 md:grid-cols-2">
                 <Card class="bg-primary text-primary-foreground">
                     <CardHeader>
                         <CardTitle>Crédito disponible</CardTitle>
@@ -40,8 +38,21 @@ const money = (value: string | number) =>
                         <div class="text-4xl font-bold">{{ money(stats.creditoDisponible) }}</div>
                     </CardContent>
                 </Card>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Acciones rapidas</CardTitle>
+                        <CardDescription>Entra directo a tus apartados.</CardDescription>
+                    </CardHeader>
+                    <CardContent class="flex flex-wrap gap-2">
+                        <Button as-child class="rounded-full"><Link :href="route('cliente.catalogo')">Ver catálogo</Link></Button>
+                        <Button as-child variant="outline" class="rounded-full"><Link :href="route('cliente.carrito')">Carrito</Link></Button>
+                        <Button as-child variant="outline" class="rounded-full"><Link :href="route('cliente.compras')">Mis compras</Link></Button>
+                        <Button as-child variant="outline" class="rounded-full"><Link :href="route('cliente.pagos')">Pagos</Link></Button>
+                    </CardContent>
+                </Card>
             </div>
-        </section>
+        </PageHeader>
 
         <section class="grid gap-4 md:grid-cols-3">
             <Card>
@@ -71,7 +82,9 @@ const money = (value: string | number) =>
                 </CardHeader>
                 <CardContent>
                     <div class="text-2xl font-bold">Disponible</div>
-                    <p class="text-xs text-muted-foreground">Listo para conectar productos</p>
+                    <Button as-child variant="link" class="h-auto px-0">
+                        <Link :href="route('cliente.catalogo')">Explorar productos</Link>
+                    </Button>
                 </CardContent>
             </Card>
         </section>
