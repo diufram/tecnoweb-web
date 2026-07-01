@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Button } from '@/components/ui/button';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
+import { DateInput, Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AdminLayout from '@/layouts/admin/AdminLayout.vue';
 import { textareaClass } from '@/lib/form-classes';
@@ -137,7 +137,7 @@ const submit = veeForm.handleSubmit((values) => {
                             <FormItem>
                                 <FormLabel>Fecha de emision</FormLabel>
                                 <FormControl>
-                                    <Input v-bind="componentField" type="date" />
+                                    <DateInput v-bind="componentField" />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
