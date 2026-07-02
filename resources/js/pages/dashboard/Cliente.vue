@@ -39,7 +39,7 @@ const { money } = useFormatters();
                     </CardContent>
                 </Card>
 
-                <Card>
+                <!-- <Card>
                     <CardHeader>
                         <CardTitle>Acciones rapidas</CardTitle>
                         <CardDescription>Entra directo a tus apartados.</CardDescription>
@@ -50,7 +50,7 @@ const { money } = useFormatters();
                         <Button as-child variant="outline" class="rounded-full"><Link :href="route('cliente.compras')">Mis compras</Link></Button>
                         <Button as-child variant="outline" class="rounded-full"><Link :href="route('cliente.pagos')">Pagos</Link></Button>
                     </CardContent>
-                </Card>
+                </Card> -->
             </div>
         </PageHeader>
 

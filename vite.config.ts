@@ -28,7 +28,15 @@ function resolveBase(mode: string): string {
 }
 
 export default defineConfig(({ mode }) => ({
+
     base: resolveBase(mode),
+    server: {
+        hmr: {
+            host: 'automatic-valiant-chariot.ngrok-free.dev', // Pega aquí tu URL de ngrok sin el https://
+            protocol: 'wss', // Importante para que el Hot Module Replacement funcione por HTTPS
+        },
+        cors: true, // Habilita CORS
+    },
     plugins: [
         laravel({
             input: ['resources/js/app.ts'],

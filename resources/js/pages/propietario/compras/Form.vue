@@ -50,6 +50,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: title.value, href: '#' },
 ];
 
+
 const initialDetails = (): CompraDetalleForm[] => {
     if (props.compra?.detalles?.length) {
         return props.compra.detalles.map((detalle) => ({

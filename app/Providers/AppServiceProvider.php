@@ -15,6 +15,11 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->forceRootUrlFromRequest();
+
+
+        if (request()->header('X-Forwarded-Proto') === 'https') {
+            URL::forceScheme('https');
+        }
     }
 
     private function forceRootUrlFromRequest(): void

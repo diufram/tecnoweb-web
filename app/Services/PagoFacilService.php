@@ -22,12 +22,14 @@ class PagoFacilService
         $paymentNumber = $paymentNumber ?: self::generarPaymentNumber();
         $monto = round($monto, 2);
 
+        $qr_url = $this->baseUrl().'generate-qr';
+
         $response = Http::withToken($accessToken)
             ->withHeaders([
                 'Content-Type' => 'application/json',
                 'Response-Language' => 'es',
             ])
-            ->post($this->baseUrl().'generate-qr', [
+            ->post($qr_url, [
                 'paymentMethod' => 34,
                 'clientName' => $clientName,
                 'documentType' => 1,
@@ -86,12 +88,12 @@ class PagoFacilService
         if ($tokenSecret === '' || $tokenService === '') {
             throw new RuntimeException('Faltan TC_TOKEN_SECRET o TC_TOKEN_SERVICE para PagoFacil.');
         }
-
+        $url_login = $this->baseUrl().'login';
         $response = Http::withHeaders([
             'tcTokenSecret' => $tokenSecret,
             'tcTokenService' => $tokenService,
             'Accept' => '*/*',
-        ])->withBody('', 'text/plain')->post($this->baseUrl().'login');
+        ])->withBody('', 'text/plain')->post($url_login);
 
         if (! $response->successful()) {
             throw new RuntimeException('No se pudo autenticar con PagoFacil. HTTP '.$response->status());

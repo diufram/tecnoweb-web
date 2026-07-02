@@ -9,6 +9,8 @@ use App\Http\Controllers\Propietario\InventarioController;
 use App\Http\Controllers\Propietario\LoteController;
 use App\Http\Controllers\Propietario\ProductoController;
 use App\Http\Controllers\Propietario\ProveedorController;
+use App\Http\Controllers\Propietario\ReporteController;
+use App\Http\Controllers\Propietario\VentaController;
 use App\Http\Controllers\Proveedor\CompraController as ProveedorCompraController;
 use App\Models\Cliente;
 use App\Models\Compra;
@@ -39,11 +41,26 @@ Route::get('dashboard/default', function () {
 Route::get('dashboard/propietario', function () {
     return Inertia::render('dashboard/Propietario', [
         'stats' => [
-            'productos' => Producto::count(),
-            'clientes' => Cliente::count(),
+            'productos'   => Producto::count(),
+            'clientes'    => Cliente::count(),
             'proveedores' => Proveedor::count(),
-            'compras' => Compra::count(),
+            'compras'     => Compra::count(),
+            'ventas'      => Venta::count(),
         ],
+        'ventas_recientes' => Venta::query()
+            ->with(['cliente.usuario:id,nombre', 'detalles.inventario.producto:id,nombre_comercial'])
+            ->latest('fecha')
+            ->latest('id')
+            ->limit(5)
+            ->get()
+            ->map(fn (Venta $venta) => [
+                'id'           => $venta->id,
+                'estado_venta' => $venta->estado_venta,
+                'fecha'        => $venta->fecha?->toDateString(),
+                'total'        => $venta->total,
+                'cliente_nombre' => $venta->cliente?->usuario?->nombre,
+                'primer_producto' => $venta->detalles->first()?->inventario?->producto?->nombre_comercial,
+            ]),
     ]);
 })->middleware(['auth', 'verified', 'actor:propietario'])->name('dashboard.propietario');
 
@@ -216,6 +233,8 @@ Route::middleware(['auth', 'verified', 'actor:propietario'])
         Route::resource('proveedores', ProveedorController::class)
             ->parameters(['proveedores' => 'proveedor'])
             ->only(['index', 'create', 'store', 'edit', 'update', 'destroy']);
+        Route::get('reportes', [ReporteController::class, 'index'])->name('reportes.index');
+        Route::resource('ventas', VentaController::class)->only(['index', 'show']);
     });
 
 require __DIR__.'/settings.php';
